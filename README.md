@@ -13,5 +13,5 @@ The colors and shapes are inspired by the works of Kandinsky and af Klint, who w
 This project can run directly on any web browser, making it accessible and easy to share. The code is written in JavaScript and utilizes the p5.js library, which simplifies the process of creating graphics and interactive content. Like most algo art, randomness is a core component in the creation of the visuals. Randomness controls the size, color, shape type, and the position of the shapes, creating a unique experience each time the animation is run. The code is designed to be modular, allowing for easy customization and experimentation with different parameters.
 
 # Contact
-Morris A. Aguilar, Ph.D.
+Morris A. Aguilar, Ph.D.<br>
 @morrisglr.bsky.social
