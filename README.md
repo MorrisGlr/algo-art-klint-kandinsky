@@ -3,6 +3,8 @@
 ## Overview
 I was inspired to make this [algorithmic art](https://en.wikipedia.org/wiki/Algorithmic_art) (algo art) from the pioneering works of [Wassily Kandinsky](https://en.wikipedia.org/wiki/Wassily_Kandinsky) and [Hilma af Klint](https://en.wikipedia.org/wiki/Hilma_af_Klint). My JavaScript-based project uses the p5.js library to dynamically generate artwork that captures the essence of abstract paintings with a modern twist. The algorithmic approach to creating art not only pays homage to the masters of abstract painting but also explores the possibilities that emerge when art intersects with technology.
 
+<b>You can view the animation in your own browser by following [this link](https://morrisglr.github.io/algo-art-klint-kandinsky/)! Get a new random animation each time you refresh the page.</b>
+
 ## Visual Description 
 In the animation, colorful shapes are scattered on the canvas that gives the viewer the impression that they are viewing a 2D plane, but once the canvas is populated with shapes, the viewer can see that the shapes are actually 3D objects. The point of view rotates to reveal that the shapes have variable depth, occupy 3D space, 
 
