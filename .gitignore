@@ -1,0 +1,11 @@
+sketch.js
+sketch_without_redeclaration.js
+sketch_without_duplicate_declaration.js
+sketch_with_trapezoid_gradient.js
+sketch_with_ordered_declarations.js
+sketch_with_more_pronounced_gradient.js
+sketch_with_corrected_trapezoid_gradient.js
+sketch_second_attempt_linear_gradient.js
+sketch_final_fix.js
+sketch_final_corrected.js
+corrected_separated_gradient_sketch.js

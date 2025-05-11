@@ -1,0 +1,21 @@
+{
+  "name": "klint",
+  "version": "1.0.0",
+  "description": "Generative Art inspired by Hilma af Klint",
+  "main": "sketch.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "generative",
+    "art",
+    "Hilma",
+    "af",
+    "Klint"
+  ],
+  "author": "Morris A Aguilar",
+  "license": "ISC",
+  "dependencies": {
+    "ccapture.js": "github:spite/ccapture.js"
+  }
+}
