@@ -393,7 +393,7 @@ fill(lerpColor(gradientColors[0], gradientColors[1], 0.1));
  * If capturing is enabled, it starts the capturer.
  * If capturing is disabled, it stops the capturer and saves the captured data.
  */
-}function keyPressed() {
+function keyPressed() {
     if (key == 'C' || key == 'c') {
       capturing = !capturing;
   
