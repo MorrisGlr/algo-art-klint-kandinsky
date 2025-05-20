@@ -384,6 +384,7 @@ fill(lerpColor(gradientColors[0], gradientColors[1], 0.1));
     
     fill(150);
     pop();
+}
 
 
 
@@ -405,4 +406,3 @@ function keyPressed() {
       }
     }
   }
-}
