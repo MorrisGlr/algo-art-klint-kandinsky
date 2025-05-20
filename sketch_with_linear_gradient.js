@@ -14,9 +14,6 @@ let finalRotationStartTime;
 let shapeFunctions = [drawTrapezoid, drawRectangle, drawCircle, drawSemiCircle, drawTriangle, drawTeardrop];
 let margin = 200;
 
-// Variable to hold the canvas element
-let canvasElement;
-
 /**
  * Computes a gradient based on the given base color.
  * @param {string} baseColor - The base color for the gradient.
@@ -35,17 +32,18 @@ let capturer = new CCapture({
   });
   let capturing = false;
 
-function setup() {
-  let canvasAttributes = { antialias: true };
-  pixelDensity(2); // Adjust if there are performance issues.
-  const targetHeight = windowHeight;
-  const targetWidth = targetHeight * (1080 / 1920);
-  canvasElement = createCanvas(targetWidth, targetHeight, WEBGL);
-  canvasElement.style('display', 'block');
-  canvasElement.style('margin', '0 auto');
-  background(200);
-  frameRate(60);
-}
+  function setup() {
+    let canvasAttributes = { antialias: true };
+    pixelDensity(2); // Adjust if there are performance issues.
+    let cnv = createCanvas(1080, 1920, WEBGL);
+    // Fit the canvas height to the browser window and center it
+    cnv.style('height', '100vh');       // Make canvas height fill the viewport
+    cnv.style('width', 'auto');         // Adjust width to maintain aspect ratio
+    cnv.style('display', 'block');      // Treat as block-level element
+    cnv.style('margin', '0 auto');      // Center horizontally in the window
+    background(200);
+    frameRate(60);
+  }
 
 
 let delayStartTime;
@@ -366,7 +364,7 @@ fill(lerpColor(gradientColors[0], gradientColors[1], 0.1));
 function drawTeardrop() {
     push();
     let gradientColors = computeGradient(this.color);
-    fill(lerpColor(gradientColors[0], gradientColors[1], 0.1));
+fill(lerpColor(gradientColors[0], gradientColors[1], 0.1));
     noStroke();
     translate(this.x, this.y, this.z);
     rotateZ(this.rotation);
@@ -388,9 +386,12 @@ function drawTeardrop() {
     curveVertex(0, this.size*2.5);
     curveVertex(-this.size/2, this.size);
     endShape(CLOSE);
+    
     fill(150);
     pop();
-}  // closes drawTeardrop
+}
+
+
 
 /**
  * Handles the key press event.
@@ -400,19 +401,13 @@ function drawTeardrop() {
  */
 function keyPressed() {
     if (key == 'C' || key == 'c') {
-        capturing = !capturing;
-        if (capturing) {
-            capturer.start();
-        } else {
-            capturer.stop();
-            capturer.save();
-        }
+      capturing = !capturing;
+  
+      if (capturing) {
+        capturer.start();
+      } else {
+        capturer.stop();
+        capturer.save();
+      }
     }
-}
-
-// Responsive canvas resizing to always fit window height and preserve aspect ratio
-function windowResized() {
-  const targetHeight = windowHeight;
-  const targetWidth = targetHeight * (1080 / 1920);
-  resizeCanvas(targetWidth, targetHeight);
-}
+  }
