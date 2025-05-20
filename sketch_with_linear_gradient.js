@@ -14,6 +14,9 @@ let finalRotationStartTime;
 let shapeFunctions = [drawTrapezoid, drawRectangle, drawCircle, drawSemiCircle, drawTriangle, drawTeardrop];
 let margin = 200;
 
+// Variable to hold the canvas element
+let canvasElement;
+
 /**
  * Computes a gradient based on the given base color.
  * @param {string} baseColor - The base color for the gradient.
@@ -32,13 +35,17 @@ let capturer = new CCapture({
   });
   let capturing = false;
 
-  function setup() {
-    let canvasAttributes = { antialias: true };
-    pixelDensity(2); // Adjust if there are performance issues.
-    createCanvas(1080, 1920, WEBGL);
-    background(200);
-    frameRate(60);
-  }
+function setup() {
+  let canvasAttributes = { antialias: true };
+  pixelDensity(2); // Adjust if there are performance issues.
+  const targetHeight = windowHeight;
+  const targetWidth = targetHeight * (1080 / 1920);
+  canvasElement = createCanvas(targetWidth, targetHeight, WEBGL);
+  canvasElement.style('display', 'block');
+  canvasElement.style('margin', '0 auto');
+  background(200);
+  frameRate(60);
+}
 
 
 let delayStartTime;
@@ -401,4 +408,11 @@ function keyPressed() {
             capturer.save();
         }
     }
+}
+
+// Responsive canvas resizing to always fit window height and preserve aspect ratio
+function windowResized() {
+  const targetHeight = windowHeight;
+  const targetWidth = targetHeight * (1080 / 1920);
+  resizeCanvas(targetWidth, targetHeight);
 }
