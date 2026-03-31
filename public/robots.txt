@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://morrisglr.github.io/algo-art-klint-kandinsky/sitemap.xml

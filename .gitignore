@@ -1,68 +1,7 @@
-sketch.js
-sketch_without_redeclaration.js
-sketch_without_duplicate_declaration.js
-sketch_with_trapezoid_gradient.js
-sketch_with_ordered_declarations.js
-sketch_with_more_pronounced_gradient.js
-sketch_with_corrected_trapezoid_gradient.js
-sketch_second_attempt_linear_gradient.js
-sketch_final_fix.js
-sketch_final_corrected.js
-corrected_separated_gradient_sketch.js
-
-# Objective
-- help me resolve the javascript error for an algo art project that is hosted on github pages.
-
-# Context
-- the expected animation is not playing as expected on the github page but it runs on my local machine when I open a live server on VSCode.
-## project directory structure
-.
-├── corrected_separated_gradient_sketch.js
-├── index.html
-├── node_modules
-│   └── ccapture.js
-│       ├── bower.json
-│       ├── build
-│       │   ├── CCapture.all.min.js
-│       │   └── CCapture.min.js
-│       ├── LICENSE
-│       ├── package.json
-│       ├── README.md
-│       └── src
-│           ├── CCapture.js
-│           ├── download.js
-│           ├── gif.js
-│           ├── gif.worker.js
-│           ├── tar.js
-│           ├── webm-writer-0.2.0.js
-│           └── Whammy.js
-├── package-lock.json
-├── package.json
-├── README.md
-├── sketch_with_linear_gradient.js
-
-# criteria
-- give suggestions at the caliber of a senior software engineer.
-- provide a solution and explain the reasoning behind it in a way tha tis easy to understand.
-
-# console error
-'''
-Loading failed for the <script> with source “https://morrisglr.github.io/algo-art-klint-kandinsky/node_modules/ccapture.js/build/CCapture.all.min.js”. algo-art-klint-kandinsky:9:70
-
-🌸 p5.js says: There's an error due to "CCapture" not being defined in the current scope (on line 29 in sketch_with_linear_gradient.js [https://morrisglr.github.io/algo-art-klint-kandinsky/sketch_with_linear_gradient.js:29:16]).
-
-If you have defined it in your code, you should check its scope, spelling, and letter-casing (JavaScript is case-sensitive). For more:
-https://p5js.org/examples/data-variable-scope.html
-https://developer.mozilla.org/docs/Web/JavaScript/Reference/Errors/Not_Defined#What_went_wrong p5.js:59792:20
-Uncaught ReferenceError: CCapture is not defined
-    <anonymous> https://morrisglr.github.io/algo-art-klint-kandinsky/sketch_with_linear_gradient.js:29
-sketch_with_linear_gradient.js:29:16
-Use of the orientation sensor is deprecated. p5.js:63242:26
-Use of the motion sensor is deprecated. p5.js:63242:26
-Uncaught ReferenceError: can't access lexical declaration 'capturing' before initialization
-    draw https://morrisglr.github.io/algo-art-klint-kandinsky/sketch_with_linear_gradient.js:92
-    redraw https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js:70809
-    _draw https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js:63046
-sketch_with_linear_gradient.js:92:9
-
-'''
+node_modules/
+dist/
+.DS_Store
+.claude/
+SPEC.md
+CHANGELOG.md
+CHANGELOG.md

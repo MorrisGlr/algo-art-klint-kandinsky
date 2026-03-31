@@ -1,21 +1,29 @@
 {
-  "name": "klint",
-  "version": "1.0.0",
-  "description": "Generative Art inspired by Hilma af Klint",
-  "main": "sketch.js",
+  "name": "algo-art-klint-kandinsky",
+  "version": "2.0.0",
+  "type": "module",
+  "description": "Generative 3D compositions inspired by Hilma af Klint and Wassily Kandinsky",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest"
   },
   "keywords": [
     "generative",
     "art",
-    "Hilma",
-    "af",
-    "Klint"
+    "Hilma af Klint",
+    "Kandinsky",
+    "p5.js",
+    "WEBGL"
   ],
   "author": "Morris A Aguilar",
   "license": "ISC",
   "dependencies": {
-    "ccapture.js": "github:spite/ccapture.js"
+    "p5": "1.11.12"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0",
+    "vitest": "^3.0.0"
   }
 }
