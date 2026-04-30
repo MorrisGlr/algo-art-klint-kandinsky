@@ -6,6 +6,20 @@ Browser-based generative art piece using p5.js WEBGL mode. Renders extruded geom
 
 This project is one entry in a broader "Computational Art History" series (alongside `algo-art-hopper` and `algo-art-wing-scale`) and is part of a multi-media creative portfolio spanning photography, sculpture, generative art, and paper layering — all housed under a unified Astro 5 portfolio site deployed to GitHub Pages.
 
+## Workflow
+
+- Always use an interview-based approach before planning or implementing features. Ask clarifying questions before starting work.
+- When implementing from SPEC.md, read the relevant spec section first, create a step-by-step plan, then implement incrementally with verification at each step.
+- When external APIs or downloads fail, pivot quickly to local/offline alternatives rather than retrying failed URLs.
+
+## CLAUDE.md Maintenance
+
+- After any significant implementation work, audit and update CLAUDE.md sections (directory tree, commands, conventions) to match actual repo state.
+
+## Testing
+
+- Always verify the sketch renders correctly in the browser and run any configured tests before reporting completion. Run `npm test` if available; otherwise open `index.html` locally and confirm no console errors.
+
 ## Architecture
 
 - Single-page app, no build system, no bundler
