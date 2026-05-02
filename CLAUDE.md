@@ -18,39 +18,68 @@ This project is one entry in a broader "Computational Art History" series (along
 
 ## Testing
 
-- Always verify the sketch renders correctly in the browser and run any configured tests before reporting completion. Run `npm test` if available; otherwise open `index.html` locally and confirm no console errors.
+- Always verify the sketch renders correctly in the browser and run `npm test` before reporting completion.
+- `npm test` runs the Vitest suite (5 test files in `test/`): `palette.test.js`, `spatial.test.js`, `gradient.test.js`, `seed.test.js`, `animation.test.js`.
+- Tests run headlessly via Node — no browser required. A `test/helpers/p5mock.js` stubs p5 globals.
 
 ## Architecture
 
-- Single-page app, no build system, no bundler
-- p5.js (v1.4.0) loaded via cdnjs CDN, running in WEBGL mode
-- CCapture.js (v1.1.0) for video export (WebM at 60fps), loaded via jsdelivr CDN
-- `package.json` exists with `ccapture.js` as a GitHub dependency (`spite/ccapture.js`); local copy in `node_modules/`
-- Canvas: 1080×1920 (portrait, 9:16), with CSS responsive sizing (`100vh` height, auto width, centered)
-- Deployed to GitHub Pages at `morrisglr.github.io/algo-art-klint-kandinsky`
+- Single-page app with **Vite** build system and ES modules
+- p5.js **v1.11.12** installed via npm (not CDN); dynamically imported in `src/main.js` to avoid module hoisting issues with global mode
+- CCapture.js v1.1.0 loaded via jsdelivr CDN — lazily instantiated only in export mode (`?export=true`)
+- Canvas: 1080×1920 (portrait, 9:16), with CSS responsive sizing; layout is side-by-side (info panel left, canvas right) on wide screens, stacked on mobile
+- Deployed to GitHub Pages at `morrisglr.github.io/algo-art-klint-kandinsky` via GitHub Actions (Vite build → `dist/`)
 - No server-side dependencies — pure client-side rendering
 
 ## Key Files
 
-- `sketch_with_linear_gradient.js` — canonical sketch file (this is what `index.html` loads via `<script>` tag)
-- `index.html` — entry point, loads p5.js and CCapture.js from CDN, then loads the canonical sketch
-
-**Archived iterations:** The repo has ~10 other sketch variants in the root directory (`sketch.js`, `sketch_final_corrected.js`, `sketch_final_fix.js`, `corrected_separated_gradient_sketch.js`, etc.). These are earlier iterations and should eventually move to a `/drafts` directory.
+```
+algo-art-klint-kandinsky/
+  src/
+    main.js         — bootstrap: dynamic p5 import, hands off to initSketch()
+    sketch.js       — setup(), draw(), keyPressed(), mousePressed(), seed & export logic
+    config.js       — all named constants (canvas size, shape counts, timing, etc.)
+    palette.js      — 4 curated HSB palettes (Klint + Kandinsky); sampleColor(), computeGradient()
+    shapes.js       — 6 shape draw functions: drawTrapezoid, drawRectangle, drawCircle, drawSemiCircle, drawTriangle, drawTeardrop
+    spatial.js      — grid + jitter placement; computePlacementPositions(), computeGridCells()
+    animation.js    — animation state machine: PLACING → DELAYING → ROTATING → COMPLETE
+  test/
+    helpers/p5mock.js     — headless p5 global stubs for Vitest
+    palette.test.js
+    spatial.test.js
+    gradient.test.js
+    seed.test.js
+    animation.test.js
+  public/
+    og-image.png    — social sharing image (1200×630)
+    robots.txt
+    sitemap.xml
+  drafts/           — ~10 archived sketch iterations (moved from root)
+  index.html        — Vite entry point, landing page HTML (info panel + canvas container)
+  vite.config.js
+  package.json
+```
 
 ## Conventions
 
 - All shape geometry uses `beginShape()`/`endShape()` with explicit vertex definitions
-- Shapes have three face groups: top face, bottom face, side faces (sides are currently flat gray `fill(150)`)
-- Color is currently fully random RGB — this is the project's biggest aesthetic weakness and the highest-priority fix
-- Animation sequence: sequential shape placement (one every 2 frames, up to 45 shapes) → 0.5s delay → 8.5s full rotation (2π on X and Z axes) → `noLoop()` halts rendering
-- Gradient uses a double-lerp via `computeGradient()`: base color is lerped 1% toward white (`0.01`), then each shape lerps 10% between those two nearly-identical colors — net effect is ~0.1% shift, visually broken
-- No seed-based randomization exists yet — outputs are not reproducible
+- Shapes have three face groups: top face (lighter gradient color), bottom face (base color), side faces (muted complementary HSB color via `computeSideColor()`)
+- Color uses **HSB mode** (`colorMode(HSB, 360, 100, 100)`) with 4 curated palettes from actual Klint and Kandinsky paintings; shapes sample colors with per-palette HSB variation
+- Gradient: `computeGradient(baseColor)` lerps `GRADIENT_LERP_AMOUNT` (0.2) toward white — top face is visibly lighter than the base
+- Animation sequence: sequential shape placement (one every 2 frames, up to 45 shapes) → 0.5s delay → 8.5s full rotation (2π on X and Z axes) → COMPLETE phase (parallax + click-to-freeze active; draw loop continues)
+- Lighting: `ambientLight(60)` + `directionalLight(200, 200, 200, 1, -1, -1)` — top-right direction
+- Seed control: `randomSeed(currentSeed)` in `initComposition()`; seed read from `#seed=N` URL hash or random on load; seed displayed in canvas corner overlay; URL hash updated on init
+- `R` key — regenerate with new random seed; `Click` — freeze/unfreeze after animation completes; `C` key — manual CCapture toggle; `?export=true` — auto-start/stop export
+- All named constants live in `src/config.js`; do not hardcode values in other files
 
 ## Commands
 
-- **Local preview:** Open `index.html` in a browser (no server needed)
-- **Video capture:** Press `C` during animation to toggle CCapture recording
-- **Deploy:** Push to `main` branch (GitHub Pages auto-deploys)
+- **Dev server:** `npm run dev` (Vite, default port 5173)
+- **Build:** `npm run build` (outputs to `dist/`)
+- **Tests:** `npm test` (Vitest, headless)
+- **Video capture (manual):** Press `C` during animation to toggle CCapture recording
+- **Video export (auto):** Open `/?export=true` in browser — auto-starts on load, auto-stops and downloads after rotation completes; filename includes current seed
+- **Deploy:** Push to `main` branch (GitHub Actions runs `npm run build` and deploys `dist/` to GitHub Pages)
 
 ## Development Log
 
@@ -97,96 +126,30 @@ Tables of quality/accuracy measurements at significant milestones.
 
 ## Current Priorities
 
-These are ranked by impact. The first three are code-level fixes that dramatically improve the piece's visual quality. The rest are structural improvements that elevate it from a learning exercise to a portfolio-grade generative art system.
+P0–P7 from the original spec are **all implemented**. The following open items remain.
 
-### P0 — Fix the Color System (Critical)
+### Completed (P0–P7 summary)
 
-Fully random RGB (`color(random(255), random(255), random(255))`) produces muddy, incoherent compositions that undermine the stated connection to Klint and Kandinsky, who both used deliberate, harmonious palettes. A creative coding curator would immediately notice this disconnect.
+| Priority | Feature | Status |
+|---|---|---|
+| P0 | Color system — HSB mode, 4 curated Klint/Kandinsky palettes | ✅ Done (`src/palette.js`) |
+| P1 | Gradient fix — `GRADIENT_LERP_AMOUNT: 0.2`, top face visibly lighter | ✅ Done (`src/config.js`, `src/palette.js`) |
+| P2 | Spatial composition — 6×11 grid with jitter + 30% skip for negative space | ✅ Done (`src/spatial.js`) |
+| P3 | Seed control — URL hash `#seed=N`, R key, seed overlay, reproducible output | ✅ Done (`src/sketch.js`) |
+| P4 | Lighting — `ambientLight(60)` + `directionalLight()` top-right direction | ✅ Done (`src/sketch.js`) |
+| P5 | Interactivity — Y-axis mouse parallax after animation; click to freeze/unfreeze | ✅ Done (`src/sketch.js`) |
+| P6 | CCapture export — `?export=true` URL param, auto-start/stop, seed in filename | ✅ Done (`src/sketch.js`) |
+| P7 | Unit tests — Vitest, 5 test suites, headless p5 mock | ✅ Done (`test/`) |
 
-**What to do:**
-- Switch from RGB to HSB color mode for better control over hue, saturation, and brightness
-- Replace random color generation with curated palettes extracted from actual Klint and Kandinsky paintings (e.g., Klint's "The Ten Largest" series, Kandinsky's "Composition VIII", "Several Circles", "Yellow-Red-Blue")
-- Each page load should randomly select one palette from a set of 4-6 options
-- Within a palette, individual shapes should sample colors with slight HSB variation for richness — not identical swatches, but constrained to the palette's harmonic range
-- The background color should complement the selected palette, not always be the same gray
+### Open Items
 
-### P1 — Fix the Gradient Bug (Quick Win)
-
-The gradient is implemented as a double-lerp that produces an imperceptible color shift:
-1. `computeGradient(baseColor)` creates `c2` via `lerpColor(c1, color(255, 255, 255), 0.01)` — only 1% toward white
-2. Each shape's draw function then calls `lerpColor(gradientColors[0], gradientColors[1], 0.1)` — 10% between two nearly-identical colors
-3. Net result: ~0.1% color shift from the base, visually indistinguishable
-
-**What to do:**
-- Fix the blend factor in `computeGradient()` — increase from `0.01` to `0.15-0.25` for a visible lighter variant
-- Consider applying the gradient to the top face only (lighter) while the bottom face uses the base color, creating a sense of light direction
-
-### P2 — Improve Spatial Composition (High Impact)
-
-Random placement within margins produces overlapping clusters and dead zones. No spatial logic governs where shapes land.
-
-**What to do (evaluate these approaches and pick one):**
-- **Grid with jitter:** Divide the canvas into cells, place one shape per cell with random offset. Simple, effective, preserves randomness.
-- **Poisson disk sampling:** Enforce minimum distance between shape centers. Better visual distribution but more complex.
-- **Golden ratio spiral:** Place shapes along a spiral path. More structured, risks looking too "designed."
-
-The chosen approach must be compatible with the sequential animation (shapes appearing one at a time).
-
-### P3 — Add Seed Control (Essential for Generative Art)
-
-There is no way to reproduce a specific composition. Standard practice in generative art is to seed the random number generator and display the seed value, so good outputs can be saved and shared.
-
-**What to do:**
-- Implement a seeded PRNG (p5.js `randomSeed()` and `noiseSeed()`)
-- Accept seed via URL hash parameter (e.g., `#seed=42`) so compositions are linkable
-- Display the current seed in small text in a canvas corner
-- Support `R` key to regenerate with a new random seed without page reload
-
-### P4 — Add Lighting (Visual Polish)
-
-The flat gray side faces (`fill(150)`) are functional but crude. p5.js WEBGL supports real lighting.
-
-**What to do:**
-- Add `ambientLight()` and `directionalLight()` to create depth
-- Use `specularMaterial()` or `ambientMaterial()` instead of flat `fill()` for sides
-- Light direction should complement the rotation animation — the reveal should feel like shapes catching light as they turn
-
-### P5 — Add Interactivity (Elevates from Animation to Artwork)
-
-Currently the viewer is entirely passive. Even subtle interaction would distinguish this from a screensaver.
-
-**What to do (pick one to start):**
-- Mouse position subtly influences shape rotation angles (parallax effect)
-- Mouse proximity causes nearby shapes to gently push away (repulsion)
-- Click to freeze/unfreeze the animation
-
-Keep interaction gentle — a suggestion, not a disruption. The existing animation sequence should still function when the mouse is idle.
-
-### P6 — Polish CCapture Export
-
-The CCapture.js integration exists but isn't production-ready for exhibition or social media.
-
-**What to do:**
-- Auto-start recording on page load (no keyboard trigger needed for export mode)
-- Stop recording after the rotation animation completes
-- Include the seed value in the export filename for traceability
-- Ensure the exported video loops cleanly if the animation is designed to loop
-
-### P7 — Add Unit Tests
-
-No tests exist. The sketch relies entirely on manual visual inspection, making refactors risky and regressions invisible.
-
-**What to do:**
-- Extract pure logic (color computation, gradient calculation, spatial placement, animation timing) out of p5.js draw functions into testable utility functions
-- Add a lightweight test runner (e.g., Vitest or plain Node `assert`) — keep it minimal, no heavy framework
-- Write unit tests for:
-  - `computeGradient()` — verify the lerp produces the expected color values
-  - Palette selection — each palette returns valid HSB/RGB values within expected ranges
-  - Spatial placement logic — shapes land within canvas bounds, respect margins, satisfy minimum distance constraints (once P2 is implemented)
-  - Animation timing — shape count caps at 45, rotation starts after placement phase, `noLoop()` triggers at correct frame
-  - Seed reproducibility — same seed produces identical shape/color/position arrays (once P3 is implemented)
-- Tests should run headlessly (no canvas needed) — mock or stub p5.js globals where necessary
-- Add a `test` script to `package.json`
+- ~~**Embed screenshot or GIF in README**~~ — ✅ Done (MP4 video via GitHub CDN)
+- ~~**Expand artist statement**~~ — ✅ Done (3 paragraphs: artistic reference, algorithmic approach, series context)
+- ~~**Rewrite seed URL instruction as plain English**~~ — ✅ Done (full example URL in controls)
+- ~~**WebGL browser-compatibility notice**~~ — ✅ Done (README Technical Overview)
+- **Add "Copy link" / share button** — the seed system is in place; a one-click "Copy composition link" button next to the seed overlay removes the URL-bar manipulation step.
+- **Submit to creative coding platforms** — OpenProcessing, fxhash, Processing Community Day, SIGGRAPH Art Gallery; discoverability is currently near zero beyond direct GitHub links.
+- **Curate 10-20 seed outputs** — run the export pipeline on strong seeds, save as submittable artifacts for exhibitions and social media.
 
 ---
 
@@ -200,29 +163,25 @@ No tests exist. The sketch relies entirely on manual visual inspection, making r
 
 These are non-code improvements that affect how the work is perceived and discovered. They matter because the generative art community and the traditional art world both evaluate context and framing, not just the visual output.
 
-### No Context at the Live URL
+### ✅ Landing Page with Context (Done)
 
-The deployed page shows the animation with no title, no artist name, no explanation, and no instructions. A viewer who receives the link doesn't know it's inspired by butterfly wing scales (wrong project — for this one, Klint and Kandinsky). They don't know to press `C` to record. The experience lacks an on-ramp.
+The deployed page now has a title ("Klint & Kandinsky"), artist name (Morris Aguilar), a 2-sentence artist statement referencing Kandinsky's *Point and Line to Plane* treatise, keyboard shortcut instructions, and a portfolio link. Dark background (#1a1a1a) matches portfolio visual language.
 
-**What to do:** Create a minimal landing page wrapper with: project title, a 2-sentence artist statement, artist name, and keyboard shortcut instructions. The page should use a dark background consistent with the portfolio site's visual language.
+### Artist Statement — Needs Expansion
 
-### No Artist Statement for the Generative Art Series
+The current statement is 2 sentences. For curator and residency contexts, it should expand to 3 short paragraphs: (1) the artistic reference + conceptual frame, (2) the algorithmic approach / what rule was encoded, (3) the series context. See SPEC.md §13 Content SEO for guidance.
 
-This is flagged by the portfolio website context as one of the most significant gaps across the entire creative practice. A curator visiting the portfolio site sees "Klint-Kandinsky" and "Wing-Scale" as titles but cannot evaluate the conceptual depth without visible descriptions. Generative art in particular requires contextual framing to be taken seriously by traditional art institutions.
+### ✅ Connection to Portfolio Site (Done)
 
-**What to do:** Write a 1-2 paragraph artist statement that connects the computational approach to the source artists' principles — not "I was inspired by Kandinsky" but "Kandinsky's systematic approach to composition (his 'Point and Line to Plane' treatise, 1926) treated visual elements as a grammar with rules. This project translates that grammar into executable code."
+The live page links back to the portfolio site via `<a href="https://morrisglr.github.io/creative" rel="author">` with `rel="author"` for SEO.
 
-### No Connection to the Portfolio Site
+### ✅ Social Sharing Metadata (Done)
 
-The algo-art pieces exist as standalone GitHub Pages deployments with no link back to the portfolio site (`morrisglr.github.io/creative`). The portfolio site's Algo section should embed or link to each piece with proper metadata (`page.json`).
-
-### No Social Sharing Metadata
-
-No Open Graph tags, no Twitter card metadata, no `<meta>` description. When the link is shared on social media or found via search, it appears as a blank card. This is fixable in the `<head>` of `index.html` with minimal effort.
+`index.html` now includes full OG tags (`og:title`, `og:description`, `og:image`, `og:url`), Twitter Card tags, `<meta name="author">`, `<link rel="canonical">`, and JSON-LD `VisualArtwork` structured data.
 
 ### No Presence on Creative Coding Platforms
 
-The work is not on OpenProcessing, fxhash, or any generative art community. Discoverability is effectively zero beyond people who receive the GitHub link directly.
+The work is not on OpenProcessing, fxhash, or any generative art community. Discoverability is currently near zero beyond direct GitHub links. Submitting here is the highest-leverage discoverability action remaining.
 
 ---
 
@@ -315,7 +274,7 @@ The portfolio becomes strategically compounding when positioned as **the public 
 
 1. **Part of a series, not a standalone piece.** A single sketch is forgettable. A "Computational Art History" series — each piece reverse-engineering a different artist's spatial and compositional logic into parametric 3D systems — becomes a portfolio that signals a unique capability: someone who can bridge art history, spatial computing, and generative systems.
 
-2. **Paired with the narrative.** "Ph.D. creates generative art series reinterpreting abstract masters through code" is a story that journalists, curators, and conference organizers want to tell. The interdisciplinary angle is the asset — but only if the art quality matches the narrative ambition. Random RGB colors and no seed control currently undercut this.
+2. **Paired with the narrative.** "Ph.D. creates generative art series reinterpreting abstract masters through code" is a story that journalists, curators, and conference organizers want to tell. The interdisciplinary angle is the asset — the art quality now matches the narrative ambition (curated palettes, seed control, lighting, interactivity). The remaining gap is curation and submission.
 
 3. **Connected to the startup.** Palentra targets documentation-heavy institutional workflows. The creative portfolio is a documentation system for creative work. The pattern is identical: take messy, heterogeneous content (medical notes / art across four media), impose structure (JSON schemas / content architecture), present it for professional evaluation (clinical quality / curatorial review). Making this parallel explicit is compelling to investors, collaborators, and press.
 
@@ -339,24 +298,27 @@ It becomes a **strategy** when it is explicitly connected to:
 
 | Action | Effort | What It Unlocks |
 |---|---|---|
-| Curated palettes + seed control | ~3 hours | Generative system, not animation. Prerequisite for everything below. |
-| Clean up repo + CLAUDE.md | ~1 hour | Claude Code can work on the project effectively. |
-| Landing page with artist statement | ~1 hour | The live URL becomes presentable to curators and collaborators. |
-| 10-20 curated seed outputs | ~2 hours | Submittable artifacts for exhibitions and social media. |
-| Post to OpenProcessing + social media | ~1 hour | Discoverability goes from zero to nonzero. |
-| Submit to 2-3 creative coding showcases | ~2 hours | External validation, network entry, career signal. |
-| About page on portfolio site | ~2 hours | Frames interdisciplinary identity as thesis, not curiosity. |
-| Custom domain for portfolio | ~30 min | Professional artist signal, not developer side project. |
-| Open Graph metadata on both sites | ~30 min | Social sharing produces visible cards, not blank links. |
+| ~~Curated palettes + seed control~~ | ~~3 hrs~~ | ✅ Done — generative system, not animation |
+| ~~Clean up repo + CLAUDE.md~~ | ~~1 hr~~ | ✅ Done |
+| ~~Landing page with artist statement~~ | ~~1 hr~~ | ✅ Done — live URL is presentable to curators |
+| ~~Open Graph metadata on both sites~~ | ~~30 min~~ | ✅ Done (this project) — still needed on portfolio site |
+| Expand artist statement to 3 paragraphs | ~30 min | Curatorial and residency credibility |
+| 10-20 curated seed outputs | ~2 hours | Submittable artifacts for exhibitions and social media |
+| Post to OpenProcessing + social media | ~1 hour | Discoverability goes from zero to nonzero |
+| Submit to 2-3 creative coding showcases | ~2 hours | External validation, network entry, career signal |
+| About page on portfolio site | ~2 hours | Frames interdisciplinary identity as thesis, not curiosity |
+| Custom domain for portfolio | ~30 min | Professional artist signal, not developer side project |
 
-Total: ~12-13 hours of focused work. The return: a publicly legible, searchable, shareable identity platform that compounds with every new piece, every publication, and every startup milestone.
+Remaining: ~8 hours. The foundation (palettes, seed control, landing page, OG metadata) is in place — the next highest-leverage actions are curation and submission.
 
 ---
 
 ## Dependencies and Known Issues
 
-- **p5.js CDN loading:** p5.js v1.4.0 loads from cdnjs (`cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js`). Version is pinned but CDN availability is a dependency.
-- **CCapture.js CDN loading:** CCapture.js v1.1.0 loads from jsdelivr (`cdn.jsdelivr.net/npm/ccapture.js@1.1.0/build/CCapture.all.min.js`). Also available locally via `node_modules/ccapture.js` but the CDN version is what `index.html` references.
-- **Portrait canvas sizing:** The 1080×1920 canvas is hardcoded but CSS responsive sizing (`100vh` height, auto width, centered) adapts to viewport.
-- **Unused variable:** `canvasAttributes` is defined in `setup()` but never passed to `createCanvas()` — dead code.
-- **`package.json` exists** with `ccapture.js` as the sole dependency (GitHub source). Minimal — no build scripts, no test runner.
+- **p5.js:** v1.11.12 installed via npm (`dependencies`). Do NOT upgrade to p5.js 2.x — it requires instance mode, which would force `p.` prefix on every p5 call throughout `src/`.
+- **CCapture.js:** v1.1.0 loaded via jsdelivr CDN in `index.html`. Not in `package.json`. Lazily instantiated in `src/sketch.js` only when `?export=true` or `C` is pressed — if the CDN fails, normal browsing is unaffected.
+- **Vite:** v6.x devDependency. Base path configured to `/algo-art-klint-kandinsky/` in `vite.config.js` for GitHub Pages sub-path deployment.
+- **Vitest:** v3.x devDependency. Test environment is `node`; p5 globals are stubbed in `test/helpers/p5mock.js`.
+- **Portrait canvas sizing:** The 1080×1920 canvas is hardcoded in `src/config.js` (`CANVAS_WIDTH`, `CANVAS_HEIGHT`). CSS responsive sizing adapts to viewport.
+- **Seed reproducibility:** Guaranteed within a pinned p5.js version only. Document this if sharing seeds publicly.
+- **No browser compatibility notice:** WebGL is required but not mentioned anywhere. Older Safari versions and some mobile browsers fail silently.
