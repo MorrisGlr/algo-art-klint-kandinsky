@@ -5,7 +5,7 @@ I was inspired to make this [algorithmic art](https://en.wikipedia.org/wiki/Algo
 
 <b>You can view the animation in your own browser by following [this link](https://morrisglr.github.io/algo-art-klint-kandinsky/)! Get a new random animation each time you refresh the page.</b>
 
-![Klint & Kandinsky — generative 3D compositions](https://github.com/user-attachments/assets/868af39e-aa54-4428-8cef-fb428973add5)
+https://github.com/user-attachments/assets/868af39e-aa54-4428-8cef-fb428973add5
 
 ## Visual Description 
 In the animation, colorful shapes are scattered on the canvas that gives the viewer the impression that they are viewing a 2D plane, but once the canvas is populated with shapes, the viewer can see that the shapes are actually 3D objects. The point of view rotates to reveal that the shapes have variable depth, occupy 3D space, 
