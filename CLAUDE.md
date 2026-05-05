@@ -26,6 +26,7 @@ This project is one entry in a broader "Computational Art History" series (along
 
 - Single-page app with **Vite** build system and ES modules
 - p5.js **v1.11.12** installed via npm (not CDN); dynamically imported in `src/main.js` to avoid module hoisting issues with global mode
+- 5 curated HSB palettes extracted from source paintings: Klint "The Ten Largest" (Childhood, Adulthood), Kandinsky (Composition VIII, Several Circles, Yellow-Red-Blue)
 - CCapture.js v1.1.0 loaded via jsdelivr CDN — lazily instantiated only in export mode (`?export=true`)
 - Canvas: 1080×1920 (portrait, 9:16), with CSS responsive sizing; layout is side-by-side (info panel left, canvas right) on wide screens, stacked on mobile
 - Deployed to GitHub Pages at `morrisglr.github.io/algo-art-klint-kandinsky` via GitHub Actions (Vite build → `dist/`)
@@ -39,7 +40,7 @@ algo-art-klint-kandinsky/
     main.js         — bootstrap: dynamic p5 import, hands off to initSketch()
     sketch.js       — setup(), draw(), keyPressed(), mousePressed(), seed & export logic
     config.js       — all named constants (canvas size, shape counts, timing, etc.)
-    palette.js      — 4 curated HSB palettes (Klint + Kandinsky); sampleColor(), computeGradient()
+    palette.js      — 5 curated HSB palettes (Klint + Kandinsky); sampleColor(), computeGradient()
     shapes.js       — 6 shape draw functions: drawTrapezoid, drawRectangle, drawCircle, drawSemiCircle, drawTriangle, drawTeardrop
     spatial.js      — grid + jitter placement; computePlacementPositions(), computeGridCells()
     animation.js    — animation state machine: PLACING → DELAYING → ROTATING → COMPLETE
@@ -54,22 +55,30 @@ algo-art-klint-kandinsky/
     og-image.png    — social sharing image (1200×630)
     robots.txt
     sitemap.xml
-  drafts/           — ~10 archived sketch iterations (moved from root)
+  drafts/           — 11 archived sketch iterations (moved from root)
   index.html        — Vite entry point, landing page HTML (info panel + canvas container)
   vite.config.js
   package.json
+  README.md
+  SPEC.md
+  CHANGELOG.md      — working lab notebook; read at session start, update at session end
+  demo.mp4          — local copy of the animation demo video
+  google58c296d5b2305ccf.html  — Google Search Console domain verification
+  .github/
+    workflows/
+      deploy.yml    — GitHub Actions: Vite build → GitHub Pages deploy
 ```
 
 ## Conventions
 
 - All shape geometry uses `beginShape()`/`endShape()` with explicit vertex definitions
 - Shapes have three face groups: top face (lighter gradient color), bottom face (base color), side faces (muted complementary HSB color via `computeSideColor()`)
-- Color uses **HSB mode** (`colorMode(HSB, 360, 100, 100)`) with 4 curated palettes from actual Klint and Kandinsky paintings; shapes sample colors with per-palette HSB variation
+- Color uses **HSB mode** (`colorMode(HSB, 360, 100, 100)`) with 5 curated palettes extracted from actual Klint and Kandinsky paintings; shapes sample colors with per-palette HSB variation
 - Gradient: `computeGradient(baseColor)` lerps `GRADIENT_LERP_AMOUNT` (0.2) toward white — top face is visibly lighter than the base
 - Animation sequence: sequential shape placement (one every 2 frames, up to 45 shapes) → 0.5s delay → 8.5s full rotation (2π on X and Z axes) → COMPLETE phase (parallax + click-to-freeze active; draw loop continues)
 - Lighting: `ambientLight(60)` + `directionalLight(200, 200, 200, 1, -1, -1)` — top-right direction
 - Seed control: `randomSeed(currentSeed)` in `initComposition()`; seed read from `#seed=N` URL hash or random on load; seed displayed in canvas corner overlay; URL hash updated on init
-- `R` key — regenerate with new random seed; `Click` — freeze/unfreeze after animation completes; `C` key — manual CCapture toggle; `?export=true` — auto-start/stop export
+- `R` key — regenerate with new random seed; `Click` — freeze/unfreeze after animation completes; `C` key — manual CCapture toggle; `?export=true` — auto-start/stop export; `Copy seed link` button — shares the current composition URL (clipboard on desktop, OS share sheet on mobile)
 - All named constants live in `src/config.js`; do not hardcode values in other files
 
 ## Commands
@@ -147,7 +156,7 @@ P0–P7 from the original spec are **all implemented**. The following open items
 - ~~**Expand artist statement**~~ — ✅ Done (3 paragraphs: artistic reference, algorithmic approach, series context)
 - ~~**Rewrite seed URL instruction as plain English**~~ — ✅ Done (full example URL in controls)
 - ~~**WebGL browser-compatibility notice**~~ — ✅ Done (README Technical Overview)
-- **Add "Copy link" / share button** — the seed system is in place; a one-click "Copy composition link" button next to the seed overlay removes the URL-bar manipulation step.
+- ~~**Add "Copy link" / share button**~~ — ✅ Done (`Copy seed link` button in `#seed-bar`; clipboard on desktop, native share sheet on mobile)
 - **Submit to creative coding platforms** — OpenProcessing, fxhash, Processing Community Day, SIGGRAPH Art Gallery; discoverability is currently near zero beyond direct GitHub links.
 - **Curate 10-20 seed outputs** — run the export pipeline on strong seeds, save as submittable artifacts for exhibitions and social media.
 
@@ -167,9 +176,9 @@ These are non-code improvements that affect how the work is perceived and discov
 
 The deployed page now has a title ("Klint & Kandinsky"), artist name (Morris Aguilar), a 2-sentence artist statement referencing Kandinsky's *Point and Line to Plane* treatise, keyboard shortcut instructions, and a portfolio link. Dark background (#1a1a1a) matches portfolio visual language.
 
-### Artist Statement — Needs Expansion
+### ✅ Artist Statement — Expanded (Done)
 
-The current statement is 2 sentences. For curator and residency contexts, it should expand to 3 short paragraphs: (1) the artistic reference + conceptual frame, (2) the algorithmic approach / what rule was encoded, (3) the series context. See SPEC.md §13 Content SEO for guidance.
+The statement in `index.html` is 3 paragraphs: (1) artistic reference + conceptual frame (Klint/Kandinsky visual grammars), (2) algorithmic approach (5 palettes, 30% cell-skip, 6 primitives, 3D extrusion), (3) series context (Computational Art History, reproducible by seed). Suitable for curatorial and residency contexts.
 
 ### ✅ Connection to Portfolio Site (Done)
 
@@ -302,7 +311,7 @@ It becomes a **strategy** when it is explicitly connected to:
 | ~~Clean up repo + CLAUDE.md~~ | ~~1 hr~~ | ✅ Done |
 | ~~Landing page with artist statement~~ | ~~1 hr~~ | ✅ Done — live URL is presentable to curators |
 | ~~Open Graph metadata on both sites~~ | ~~30 min~~ | ✅ Done (this project) — still needed on portfolio site |
-| Expand artist statement to 3 paragraphs | ~30 min | Curatorial and residency credibility |
+| ~~Expand artist statement to 3 paragraphs~~ | ~~30 min~~ | ✅ Done — 3 paragraphs in `index.html` |
 | 10-20 curated seed outputs | ~2 hours | Submittable artifacts for exhibitions and social media |
 | Post to OpenProcessing + social media | ~1 hour | Discoverability goes from zero to nonzero |
 | Submit to 2-3 creative coding showcases | ~2 hours | External validation, network entry, career signal |

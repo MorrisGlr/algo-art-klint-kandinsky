@@ -88,6 +88,27 @@ export function initSketch() {
     currentSeed = parseSeedFromHash() || Math.floor(Math.random() * 1000000);
     initComposition();
 
+    // Share button — copy seed URL to clipboard, or open native share sheet on mobile
+    const shareBtn = document.getElementById('share-btn');
+    if (shareBtn) {
+      shareBtn.addEventListener('click', function () {
+        const url = window.location.href;
+        if (navigator.share) {
+          navigator.share({ title: 'Klint & Kandinsky — seed ' + currentSeed, url })
+            .then(function () {
+              shareBtn.textContent = 'Shared!';
+              setTimeout(function () { shareBtn.textContent = 'Copy seed link'; }, 1500);
+            })
+            .catch(function () { /* user dismissed share sheet — no feedback needed */ });
+        } else {
+          navigator.clipboard.writeText(url).then(function () {
+            shareBtn.textContent = 'Copied!';
+            setTimeout(function () { shareBtn.textContent = 'Copy seed link'; }, 1500);
+          });
+        }
+      });
+    }
+
     // Export mode: auto-start CCapture recording
     const params = new URLSearchParams(window.location.search);
     exportMode = params.get('export') === 'true';
@@ -168,7 +189,8 @@ export function initSketch() {
     }
   };
 
-  window.mousePressed = function () {
+  window.mousePressed = function (event) {
+    if (event && event.target && event.target.id === 'share-btn') return;
     if (animState && animState.phase === PHASE.COMPLETE) {
       isFrozen = !isFrozen;
       if (isFrozen) {
