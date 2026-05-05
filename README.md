@@ -14,7 +14,30 @@ In the animation, colorful shapes are scattered on the canvas that gives the vie
 The colors and shapes are inspired by the works of Kandinsky and af Klint, who were known for their use of [vibrant colors](https://en.wikipedia.org/wiki/Hilma_af_Klint#/media/File:Hilma_af_Klint_-_Group_IX_UW_No._25,_The_Dove,_No._1_(13912).jpg) and [geometric forms](https://en.wikipedia.org/wiki/Wassily_Kandinsky#/media/File:Vassily_Kandinsky,_1923_-_On_White_II.jpg). It is a testament to the enduring influence of their artistry and an exploration of how their visionary approaches to abstraction can be reinterpreted in the digital age.
 
 ## Technical Overview
-This project can run directly on any web browser, making it accessible and easy to share. Requires WebGL, supported in all modern browsers. Older Safari versions and some mobile browsers may not render the canvas. The code is written in JavaScript and utilizes the p5.js library, which simplifies the process of creating graphics and interactive content. Like most algo art, randomness is a core component in the creation of the visuals. Randomness controls the size, color, shape type, and the position of the shapes, creating a unique experience each time the animation is run. The code is designed to be modular, allowing for easy customization and experimentation with different parameters.
+
+- **Stack:** JavaScript, [p5.js](https://p5js.org/) (WEBGL mode), Vite
+- **Rendering:** 6 extruded 3D primitives (trapezoid, rectangle, circle, semi-circle, triangle, teardrop) placed on a probabilistic grid; 5 color palettes extracted from source Klint and Kandinsky paintings
+- **Randomness:** Every composition is seeded — same seed always produces the same output. Share a specific composition via URL (`#seed=42`)
+- **Browser:** Runs in any modern browser with WebGL. Older Safari versions and some mobile browsers may fail silently.
+- **Local development:** See [Run Locally](#run-locally) below
+
+## Run Locally
+
+**Prerequisites:** Node.js v18+
+
+```bash
+npm install
+npm run dev
+```
+
+Then open `http://localhost:5173` in your browser.
+
+| Script | Description |
+|---|---|
+| `npm run dev` | Start Vite dev server with hot reload |
+| `npm run build` | Build for production (outputs to `dist/`) |
+| `npm run preview` | Preview the production build locally |
+| `npm test` | Run the Vitest suite (5 test files, headless) |
 
 ## About
 
