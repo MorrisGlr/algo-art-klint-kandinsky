@@ -26,6 +26,8 @@ The colors and shapes are inspired by the works of Kandinsky and af Klint, who w
 **Prerequisites:** Node.js v18+
 
 ```bash
+git clone https://github.com/MorrisGlr/algo-art-klint-kandinsky.git
+cd algo-art-klint-kandinsky
 npm install
 npm run dev
 ```

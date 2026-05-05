@@ -141,7 +141,7 @@ P0–P7 from the original spec are **all implemented**. The following open items
 
 | Priority | Feature | Status |
 |---|---|---|
-| P0 | Color system — HSB mode, 4 curated Klint/Kandinsky palettes | ✅ Done (`src/palette.js`) |
+| P0 | Color system — HSB mode, 5 curated Klint/Kandinsky palettes | ✅ Done (`src/palette.js`) |
 | P1 | Gradient fix — `GRADIENT_LERP_AMOUNT: 0.2`, top face visibly lighter | ✅ Done (`src/config.js`, `src/palette.js`) |
 | P2 | Spatial composition — 6×11 grid with jitter + 30% skip for negative space | ✅ Done (`src/spatial.js`) |
 | P3 | Seed control — URL hash `#seed=N`, R key, seed overlay, reproducible output | ✅ Done (`src/sketch.js`) |
@@ -157,6 +157,7 @@ P0–P7 from the original spec are **all implemented**. The following open items
 - ~~**Rewrite seed URL instruction as plain English**~~ — ✅ Done (full example URL in controls)
 - ~~**WebGL browser-compatibility notice**~~ — ✅ Done (README Technical Overview)
 - ~~**Add "Copy link" / share button**~~ — ✅ Done (`Copy seed link` button in `#seed-bar`; clipboard on desktop, native share sheet on mobile)
+- ~~**QUICKSTART / Run Locally section in README**~~ — ✅ Done (Node v18+ prereq, npm install/dev, localhost:5173, 4-row script table; clarifying sentence added to Technical Overview)
 - **Submit to creative coding platforms** — OpenProcessing, fxhash, Processing Community Day, SIGGRAPH Art Gallery; discoverability is currently near zero beyond direct GitHub links.
 - **Curate 10-20 seed outputs** — run the export pipeline on strong seeds, save as submittable artifacts for exhibitions and social media.
 
@@ -174,7 +175,7 @@ These are non-code improvements that affect how the work is perceived and discov
 
 ### ✅ Landing Page with Context (Done)
 
-The deployed page now has a title ("Klint & Kandinsky"), artist name (Morris Aguilar), a 2-sentence artist statement referencing Kandinsky's *Point and Line to Plane* treatise, keyboard shortcut instructions, and a portfolio link. Dark background (#1a1a1a) matches portfolio visual language.
+The deployed page has a title ("Klint & Kandinsky"), artist name (Morris Aguilar), a 3-paragraph artist statement (artistic reference, algorithmic approach, series context), keyboard shortcut instructions, and a portfolio link. Dark background (#1a1a1a) matches portfolio visual language.
 
 ### ✅ Artist Statement — Expanded (Done)
 
@@ -330,4 +331,3 @@ Remaining: ~8 hours. The foundation (palettes, seed control, landing page, OG me
 - **Vitest:** v3.x devDependency. Test environment is `node`; p5 globals are stubbed in `test/helpers/p5mock.js`.
 - **Portrait canvas sizing:** The 1080×1920 canvas is hardcoded in `src/config.js` (`CANVAS_WIDTH`, `CANVAS_HEIGHT`). CSS responsive sizing adapts to viewport.
 - **Seed reproducibility:** Guaranteed within a pinned p5.js version only. Document this if sharing seeds publicly.
-- **No browser compatibility notice:** WebGL is required but not mentioned anywhere. Older Safari versions and some mobile browsers fail silently.
