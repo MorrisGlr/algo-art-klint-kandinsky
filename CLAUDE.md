@@ -26,7 +26,7 @@ This project is one entry in a broader "Computational Art History" series (along
 
 - Single-page app with **Vite** build system and ES modules
 - p5.js **v1.11.12** installed via npm (not CDN); dynamically imported in `src/main.js` to avoid module hoisting issues with global mode
-- 5 curated HSB palettes extracted from source paintings: Klint "The Ten Largest" (Childhood, Adulthood), Kandinsky (Composition VIII, Several Circles, Yellow-Red-Blue)
+- Painter-specific data (5 curated HSB palettes + grid constants) isolated in `src/klint-kandinsky.js` — adding a new painter means adding a new file in the same shape and swapping the import in `palette.js` and `spatial.js`
 - CCapture.js v1.1.0 loaded via jsdelivr CDN — lazily instantiated only in export mode (`?export=true`)
 - Canvas: 1080×1920 (portrait, 9:16), with CSS responsive sizing; layout is side-by-side (info panel left, canvas right) on wide screens, stacked on mobile
 - Deployed to GitHub Pages at `morrisglr.github.io/algo-art-klint-kandinsky` via GitHub Actions (Vite build → `dist/`)
@@ -37,13 +37,14 @@ This project is one entry in a broader "Computational Art History" series (along
 ```
 algo-art-klint-kandinsky/
   src/
-    main.js         — bootstrap: dynamic p5 import, hands off to initSketch()
-    sketch.js       — setup(), draw(), keyPressed(), mousePressed(), seed & export logic
-    config.js       — all named constants (canvas size, shape counts, timing, etc.)
-    palette.js      — 5 curated HSB palettes (Klint + Kandinsky); sampleColor(), computeGradient()
-    shapes.js       — 6 shape draw functions: drawTrapezoid, drawRectangle, drawCircle, drawSemiCircle, drawTriangle, drawTeardrop
-    spatial.js      — grid + jitter placement; computePlacementPositions(), computeGridCells()
-    animation.js    — animation state machine: PLACING → DELAYING → ROTATING → COMPLETE
+    main.js              — bootstrap: dynamic p5 import, hands off to initSketch()
+    sketch.js            — setup(), draw(), keyPressed(), mousePressed(), seed & export logic
+    config.js            — rendering constants (canvas size, shape counts, timing, etc.)
+    klint-kandinsky.js   — painter profile: 5 curated HSB palettes + grid constants (cols, rows, skipProbability, jitterFraction); no p5 dependency — pure data
+    palette.js           — color functions: sampleColor(), computeGradient(), selectPalette(); imports palette data from klint-kandinsky.js
+    shapes.js            — 6 shape draw functions: drawTrapezoid, drawRectangle, drawCircle, drawSemiCircle, drawTriangle, drawTeardrop
+    spatial.js           — grid + jitter placement; computePlacementPositions(), computeGridCells(); imports grid constants from klint-kandinsky.js
+    animation.js         — animation state machine: PLACING → DELAYING → ROTATING → COMPLETE
   test/
     helpers/p5mock.js     — headless p5 global stubs for Vitest
     palette.test.js
@@ -199,7 +200,7 @@ The work is not on OpenProcessing, fxhash, or any generative art community. Disc
 
 ### Near-Term (This Project)
 
-1. **Parameterized generative system.** The project currently produces a single fixed animation style. True generative art produces *families* of outputs. Once seed control and curated palettes are in place, the system should be capable of generating visually distinct compositions that all belong to the same aesthetic family — different palette, different spatial arrangement, different shape distribution, same underlying rules.
+1. **Parameterized generative system.** ✅ Seed control and 5 curated palettes are in place — the system already generates visually distinct compositions that belong to the same aesthetic family. Next step: curate 10-20 strong seeds as submittable artifacts and expose the palette/grid parameters to viewers (e.g., a palette cycle button).
 
 2. **Gallery/exhibition-ready outputs.** Curate 10-20 specific seeds that produce strong compositions. Export high-resolution video loops and stills for each. These become submittable artifacts for creative coding showcases (Processing Community Day, SIGGRAPH Art Gallery, Ars Electronica Open Call, Gray Area Festival, Eyeo Festival).
 
@@ -229,9 +230,9 @@ These are drawn from both the project-level and portfolio-level context document
 
 ### For This Project Specifically
 
-- **Curated palettes from source paintings.** The single biggest visual improvement. Turns "inspired by Klint" from vibes into data.
-- **Seed control + reproducibility.** Transforms the project from a "motion graphic" into a "generative system" in the strict sense. Unlocks curation, sharing, and exhibition.
-- **Interactivity.** Even subtle mouse interaction elevates the work from animation to interactive artwork in curatorial eyes.
+- ~~**Curated palettes from source paintings.**~~ ✅ Done — 5 palettes extracted as HSB values from actual Klint and Kandinsky paintings.
+- ~~**Seed control + reproducibility.**~~ ✅ Done — `#seed=N` URL hash, R key regeneration, seed overlay, reproducible output per pinned p5.js version.
+- ~~**Interactivity.**~~ ✅ Done — Y-axis mouse parallax after animation; click to freeze/unfreeze; `Copy seed link` share button.
 - **Series framing.** One sketch is a project. A curated series of 5-10 "Algorithmic Masters" pieces becomes a body of work. Bodies of work get invited.
 - **Export pipeline.** The CCapture.js infrastructure exists but isn't polished enough for exhibition-quality video or social-media-ready loops.
 - **Submit to showcases.** Processing Community Day, SIGGRAPH Art Gallery, Ars Electronica Open Call, creative coding meetups. The interdisciplinary signal (physician-engineer-artist) is an asymmetric advantage in these venues because that combination essentially does not exist.
@@ -239,7 +240,7 @@ These are drawn from both the project-level and portfolio-level context document
 ### For the Portfolio as a Whole
 
 - **Artist statement page.** Most significant gap. Curators check for this before the work itself.
-- **Open Graph / social sharing metadata.** Both on this project's `index.html` and on the portfolio site's `Layout.astro`.
+- ~~**Open Graph / social sharing metadata on this project.**~~ ✅ Done — full OG tags, Twitter Card, JSON-LD in `index.html`. Still needed: portfolio site's `Layout.astro`.
 - **Contact page on the portfolio site.** Currently the only contact info is in the GitHub README.
 - **Process documentation.** Curators increasingly value seeing how the work was made. Even 1-2 process screenshots per series would differentiate.
 - **Connect creative work to the startup narrative.** Palentra targets documentation-heavy institutional workflows. The creative portfolio is literally a documentation system for creative work. The pattern is identical: take messy, heterogeneous content, impose structure, present it for professional evaluation.
@@ -319,7 +320,7 @@ It becomes a **strategy** when it is explicitly connected to:
 | About page on portfolio site | ~2 hours | Frames interdisciplinary identity as thesis, not curiosity |
 | Custom domain for portfolio | ~30 min | Professional artist signal, not developer side project |
 
-Remaining: ~8 hours. The foundation (palettes, seed control, landing page, OG metadata) is in place — the next highest-leverage actions are curation and submission.
+Remaining: ~7 hours. The foundation (palettes, seed control, landing page, OG metadata, share button, QUICKSTART) is in place — the next highest-leverage actions are curation and submission.
 
 ---
 

@@ -1,9 +1,7 @@
 import { CONFIG } from './config.js';
+import { KLINT_KANDINSKY } from './klint-kandinsky.js';
 
-const GRID_COLS = 6;
-const GRID_ROWS = 11;
-const CELL_SKIP_PROBABILITY = 0.3;
-const CELL_JITTER_FRACTION = 0.35;
+const { cols: GRID_COLS, rows: GRID_ROWS, skipProbability: CELL_SKIP_PROBABILITY, jitterFraction: CELL_JITTER_FRACTION } = KLINT_KANDINSKY.grid;
 
 export function computeGridCells(canvasWidth, canvasHeight, cols, rows, margin) {
   const usableW = canvasWidth - 2 * margin;

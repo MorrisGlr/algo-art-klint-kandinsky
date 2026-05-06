@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { PALETTES, selectPalette, sampleColor, computeGradient, computeSideColor } from '../src/palette.js';
+import { KLINT_KANDINSKY } from '../src/klint-kandinsky.js';
+import { selectPalette, sampleColor, computeGradient, computeSideColor } from '../src/palette.js';
+
+const PALETTES = KLINT_KANDINSKY.palettes;
 
 describe('PALETTES', () => {
   it('has at least 4 palettes', () => {
