@@ -46,7 +46,7 @@ describe('PALETTES', () => {
 describe('selectPalette', () => {
   it('returns a valid palette', () => {
     randomSeed(42);
-    const p = selectPalette();
+    const p = selectPalette(PALETTES);
     expect(p).toHaveProperty('name');
     expect(p).toHaveProperty('colors');
     expect(PALETTES).toContain(p);
@@ -54,9 +54,9 @@ describe('selectPalette', () => {
 
   it('same seed returns same palette', () => {
     randomSeed(42);
-    const p1 = selectPalette();
+    const p1 = selectPalette(PALETTES);
     randomSeed(42);
-    const p2 = selectPalette();
+    const p2 = selectPalette(PALETTES);
     expect(p1.name).toBe(p2.name);
   });
 });

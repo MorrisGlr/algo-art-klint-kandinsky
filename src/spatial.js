@@ -1,7 +1,4 @@
 import { CONFIG } from './config.js';
-import { KLINT_KANDINSKY } from './klint-kandinsky.js';
-
-const { cols: GRID_COLS, rows: GRID_ROWS, skipProbability: CELL_SKIP_PROBABILITY, jitterFraction: CELL_JITTER_FRACTION } = KLINT_KANDINSKY.grid;
 
 export function computeGridCells(canvasWidth, canvasHeight, cols, rows, margin) {
   const usableW = canvasWidth - 2 * margin;
@@ -23,19 +20,19 @@ export function computeGridCells(canvasWidth, canvasHeight, cols, rows, margin) 
   return cells;
 }
 
-export function computePlacementPositions() {
+export function computePlacementPositions(grid) {
   const cells = computeGridCells(
     CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT,
-    GRID_COLS, GRID_ROWS, CONFIG.MARGIN
+    grid.cols, grid.rows, CONFIG.MARGIN
   );
 
   // Skip cells probabilistically for negative space
-  const surviving = cells.filter(() => random() > CELL_SKIP_PROBABILITY);
+  const surviving = cells.filter(() => random() > grid.skipProbability);
 
   // Jitter each cell position within bounds
   const jittered = surviving.map((cell) => ({
-    x: cell.x + random(-cell.cellW * CELL_JITTER_FRACTION, cell.cellW * CELL_JITTER_FRACTION),
-    y: cell.y + random(-cell.cellH * CELL_JITTER_FRACTION, cell.cellH * CELL_JITTER_FRACTION),
+    x: cell.x + random(-cell.cellW * grid.jitterFraction, cell.cellW * grid.jitterFraction),
+    y: cell.y + random(-cell.cellH * grid.jitterFraction, cell.cellH * grid.jitterFraction),
   }));
 
   // Fisher-Yates shuffle for non-obvious sequential order

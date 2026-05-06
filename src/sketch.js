@@ -1,4 +1,5 @@
 import { CONFIG } from './config.js';
+import { PAINTERS, DEFAULT_PAINTER } from './painters.js';
 import { sampleColor, computeGradient, computeSideColor, getBackgroundColor, selectPalette } from './palette.js';
 import { computePlacementPositions } from './spatial.js';
 import { drawTrapezoid, drawRectangle, drawCircle, drawSemiCircle, drawTriangle, drawTeardrop } from './shapes.js';
@@ -19,6 +20,7 @@ let shapes = [];
 let positions = [];
 let animState;
 let palette;
+let activePainter;
 let currentSeed;
 let isFrozen = false;
 let capturing = false;
@@ -40,17 +42,26 @@ function updateSeedDisplay() {
 }
 
 function updateHash() {
-  history.replaceState(null, '', '#seed=' + currentSeed);
+  const url = new URL(window.location.href);
+  url.hash = 'seed=' + currentSeed;
+  history.replaceState(null, '', url.toString());
 }
 
 function initComposition() {
   randomSeed(currentSeed);
-  palette = selectPalette();
-  positions = computePlacementPositions();
+  palette = selectPalette(activePainter.palettes);
+  positions = computePlacementPositions(activePainter.grid);
   animState = createAnimationState();
   shapes = [];
   updateSeedDisplay();
   updateHash();
+}
+
+function resolveRotation(painter) {
+  const mode = painter.rotationMode || 'free';
+  if (mode === 'fixed') return 0;
+  if (mode === 'orthogonal') return Math.floor(random(4)) * HALF_PI;
+  return random(TWO_PI);
 }
 
 function createRandomShape() {
@@ -61,14 +72,16 @@ function createRandomShape() {
 
   const baseColor = sampleColor(palette);
   const grad = computeGradient(baseColor);
+  const shapePool = activePainter.shapeTypes || SHAPE_TYPES;
 
   return {
-    type: SHAPE_TYPES[Math.floor(random(SHAPE_TYPES.length))],
+    type: shapePool[Math.floor(random(shapePool.length))],
     x: pos.x,
     y: pos.y,
     z: random(-CONFIG.CANVAS_WIDTH * CONFIG.Z_RANGE_FACTOR, CONFIG.CANVAS_WIDTH * CONFIG.Z_RANGE_FACTOR),
-    rotation: random(TWO_PI),
+    rotation: resolveRotation(activePainter),
     size: random(CONFIG.MIN_SIZE, CONFIG.MAX_SIZE),
+    aspectRatio: random(0.4, 2.5),
     topColor: grad.topColor,
     baseColor: grad.baseColor,
     sideColor: computeSideColor(baseColor),
@@ -84,6 +97,10 @@ export function initSketch() {
     cnv.parent('canvas-container');
     document.getElementById('canvas-container').classList.add('canvas-ready');
     frameRate(CONFIG.FRAME_RATE);
+
+    const params = new URLSearchParams(window.location.search);
+    const painterKey = params.get('painter') || DEFAULT_PAINTER;
+    activePainter = PAINTERS[painterKey] || PAINTERS[DEFAULT_PAINTER];
 
     currentSeed = parseSeedFromHash() || Math.floor(Math.random() * 1000000);
     initComposition();
@@ -110,7 +127,6 @@ export function initSketch() {
     }
 
     // Export mode: auto-start CCapture recording
-    const params = new URLSearchParams(window.location.search);
     exportMode = params.get('export') === 'true';
     if (exportMode && typeof CCapture !== 'undefined') {
       capturer = new CCapture({ format: 'webm', framerate: 60 });

@@ -1,10 +1,7 @@
 import { CONFIG } from './config.js';
-import { KLINT_KANDINSKY } from './klint-kandinsky.js';
 
-const PALETTES = KLINT_KANDINSKY.palettes;
-
-export function selectPalette() {
-  return PALETTES[Math.floor(random(PALETTES.length))];
+export function selectPalette(palettes) {
+  return palettes[Math.floor(random(palettes.length))];
 }
 
 export function sampleColor(palette) {

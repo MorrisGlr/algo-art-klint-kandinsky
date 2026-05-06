@@ -1,12 +1,13 @@
 import { describe, it, expect } from 'vitest';
+import { KLINT_KANDINSKY } from '../src/klint-kandinsky.js';
 import { selectPalette, sampleColor, computeGradient, computeSideColor } from '../src/palette.js';
 import { computePlacementPositions } from '../src/spatial.js';
 import { CONFIG } from '../src/config.js';
 
 function generateComposition(seed) {
   randomSeed(seed);
-  const palette = selectPalette();
-  const positions = computePlacementPositions();
+  const palette = selectPalette(KLINT_KANDINSKY.palettes);
+  const positions = computePlacementPositions(KLINT_KANDINSKY.grid);
   const shapes = [];
   const types = ['trapezoid', 'rectangle', 'circle', 'semiCircle', 'triangle', 'teardrop'];
 

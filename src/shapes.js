@@ -46,35 +46,36 @@ export function drawRectangle(shape) {
   translate(shape.x, shape.y, shape.z);
   rotateZ(shape.rotation);
 
-  const hs = shape.size / 2;
+  const hw = (shape.size * (shape.aspectRatio || 1)) / 2;
+  const hh = shape.size / 2;
   const ht = shape.thickness / 2;
 
   // Top face
   ambientMaterial(shape.topColor);
   beginShape();
   normal(0, 0, 1);
-  vertex(-hs, -hs, ht);
-  vertex(hs, -hs, ht);
-  vertex(hs, hs, ht);
-  vertex(-hs, hs, ht);
+  vertex(-hw, -hh, ht);
+  vertex(hw, -hh, ht);
+  vertex(hw, hh, ht);
+  vertex(-hw, hh, ht);
   endShape(CLOSE);
 
   // Bottom face
   ambientMaterial(shape.baseColor);
   beginShape();
   normal(0, 0, -1);
-  vertex(-hs, -hs, -ht);
-  vertex(-hs, hs, -ht);
-  vertex(hs, hs, -ht);
-  vertex(hs, -hs, -ht);
+  vertex(-hw, -hh, -ht);
+  vertex(-hw, hh, -ht);
+  vertex(hw, hh, -ht);
+  vertex(hw, -hh, -ht);
   endShape(CLOSE);
 
   // Sides
   ambientMaterial(shape.sideColor);
-  drawSideQuad(-hs, -hs, hs, -hs, ht);  // top
-  drawSideQuad(hs, -hs, hs, hs, ht);    // right
-  drawSideQuad(hs, hs, -hs, hs, ht);    // bottom
-  drawSideQuad(-hs, hs, -hs, -hs, ht);  // left
+  drawSideQuad(-hw, -hh, hw, -hh, ht);  // top
+  drawSideQuad(hw, -hh, hw, hh, ht);    // right
+  drawSideQuad(hw, hh, -hw, hh, ht);    // bottom
+  drawSideQuad(-hw, hh, -hw, -hh, ht);  // left
 
   pop();
 }

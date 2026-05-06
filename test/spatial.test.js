@@ -29,15 +29,17 @@ describe('computeGridCells', () => {
 });
 
 describe('computePlacementPositions', () => {
+  const KLINT_GRID = { cols: 6, rows: 11, skipProbability: 0.3, jitterFraction: 0.35 };
+
   beforeEach(() => randomSeed(42));
 
   it('returns at most MAX_SHAPES positions', () => {
-    const positions = computePlacementPositions();
+    const positions = computePlacementPositions(KLINT_GRID);
     expect(positions.length).toBeLessThanOrEqual(CONFIG.MAX_SHAPES);
   });
 
   it('returns positions with x and y properties', () => {
-    const positions = computePlacementPositions();
+    const positions = computePlacementPositions(KLINT_GRID);
     for (const p of positions) {
       expect(p).toHaveProperty('x');
       expect(p).toHaveProperty('y');
@@ -48,17 +50,17 @@ describe('computePlacementPositions', () => {
 
   it('same seed produces identical positions', () => {
     randomSeed(99);
-    const p1 = computePlacementPositions();
+    const p1 = computePlacementPositions(KLINT_GRID);
     randomSeed(99);
-    const p2 = computePlacementPositions();
+    const p2 = computePlacementPositions(KLINT_GRID);
     expect(p1).toEqual(p2);
   });
 
   it('different seeds produce different positions', () => {
     randomSeed(1);
-    const p1 = computePlacementPositions();
+    const p1 = computePlacementPositions(KLINT_GRID);
     randomSeed(2);
-    const p2 = computePlacementPositions();
+    const p2 = computePlacementPositions(KLINT_GRID);
     const same = p1.every((pos, i) => pos.x === p2[i]?.x && pos.y === p2[i]?.y);
     expect(same).toBe(false);
   });

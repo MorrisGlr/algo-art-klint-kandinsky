@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Browser-based generative art piece using p5.js WEBGL mode. Renders extruded geometric primitives (trapezoids, rectangles, circles, semi-circles, triangles, teardrops) with randomized spatial placement, color, rotation, and z-depth on a portrait canvas. Inspired by the compositional principles of Hilma af Klint and Wassily Kandinsky — specifically their use of geometric abstraction, deliberate color harmonics, and spatial tension between shapes.
+Browser-based generative art piece using p5.js WEBGL mode. Renders extruded geometric primitives (trapezoids, rectangles, circles, semi-circles, triangles, teardrops) with randomized spatial placement, color, rotation, and z-depth on a portrait canvas. Ships two painter profiles selectable via URL param: the default (`?painter=klint-kandinsky`) is inspired by Hilma af Klint and Wassily Kandinsky — geometric abstraction, deliberate color harmonics, spatial tension; `?painter=mondrian` is inspired by Piet Mondrian — primary palettes, orthogonal rectangle-only compositions, sparse grid.
 
 This project is one entry in a broader "Computational Art History" series (alongside `algo-art-hopper` and `algo-art-wing-scale`) and is part of a multi-media creative portfolio spanning photography, sculpture, generative art, and paper layering — all housed under a unified Astro 5 portfolio site deployed to GitHub Pages.
 
@@ -26,7 +26,8 @@ This project is one entry in a broader "Computational Art History" series (along
 
 - Single-page app with **Vite** build system and ES modules
 - p5.js **v1.11.12** installed via npm (not CDN); dynamically imported in `src/main.js` to avoid module hoisting issues with global mode
-- Painter-specific data (5 curated HSB palettes + grid constants) isolated in `src/klint-kandinsky.js` — adding a new painter means adding a new file in the same shape and swapping the import in `palette.js` and `spatial.js`
+- Two painter profiles ship: `src/klint-kandinsky.js` (Klint + Kandinsky, 5 palettes, 6×11 grid) and `src/mondrian.js` (Mondrian, 5 palettes, 4×6 grid, rectangles only). `src/painters.js` is the registry; active profile is selected at runtime via `?painter=<key>` URL param (default: `klint-kandinsky`). Adding painter #3 = create file + add one entry to `painters.js`
+- `selectPalette(palettes)` and `computePlacementPositions(grid)` are parameter-driven — no profile is hardcoded in `palette.js` or `spatial.js`
 - CCapture.js v1.1.0 loaded via jsdelivr CDN — lazily instantiated only in export mode (`?export=true`)
 - Canvas: 1080×1920 (portrait, 9:16), with CSS responsive sizing; layout is side-by-side (info panel left, canvas right) on wide screens, stacked on mobile
 - Deployed to GitHub Pages at `morrisglr.github.io/algo-art-klint-kandinsky` via GitHub Actions (Vite build → `dist/`)
@@ -38,12 +39,14 @@ This project is one entry in a broader "Computational Art History" series (along
 algo-art-klint-kandinsky/
   src/
     main.js              — bootstrap: dynamic p5 import, hands off to initSketch()
-    sketch.js            — setup(), draw(), keyPressed(), mousePressed(), seed & export logic
+    sketch.js            — setup(), draw(), keyPressed(), mousePressed(), seed & export logic; resolves active painter from ?painter= URL param
     config.js            — rendering constants (canvas size, shape counts, timing, etc.)
-    klint-kandinsky.js   — painter profile: 5 curated HSB palettes + grid constants (cols, rows, skipProbability, jitterFraction); no p5 dependency — pure data
-    palette.js           — color functions: sampleColor(), computeGradient(), selectPalette(); imports palette data from klint-kandinsky.js
+    painters.js          — painter registry: imports all profiles, exports PAINTERS map and DEFAULT_PAINTER
+    klint-kandinsky.js   — painter profile: 5 curated HSB palettes + grid {cols:6, rows:11} + no shapeTypes restriction
+    mondrian.js          — painter profile: 5 curated HSB palettes + grid {cols:4, rows:6} + shapeTypes:['rectangle'] + rotationMode:'fixed'
+    palette.js           — color functions: selectPalette(palettes), sampleColor(), computeGradient(); no hardcoded profile import
     shapes.js            — 6 shape draw functions: drawTrapezoid, drawRectangle, drawCircle, drawSemiCircle, drawTriangle, drawTeardrop
-    spatial.js           — grid + jitter placement; computePlacementPositions(), computeGridCells(); imports grid constants from klint-kandinsky.js
+    spatial.js           — grid + jitter placement; computePlacementPositions(grid), computeGridCells(); no hardcoded profile import
     animation.js         — animation state machine: PLACING → DELAYING → ROTATING → COMPLETE
   test/
     helpers/p5mock.js     — headless p5 global stubs for Vitest
@@ -74,13 +77,16 @@ algo-art-klint-kandinsky/
 
 - All shape geometry uses `beginShape()`/`endShape()` with explicit vertex definitions
 - Shapes have three face groups: top face (lighter gradient color), bottom face (base color), side faces (muted complementary HSB color via `computeSideColor()`)
-- Color uses **HSB mode** (`colorMode(HSB, 360, 100, 100)`) with 5 curated palettes extracted from actual Klint and Kandinsky paintings; shapes sample colors with per-palette HSB variation
+- Color uses **HSB mode** (`colorMode(HSB, 360, 100, 100)`) with 5 curated palettes per painter (10 total: Klint/Kandinsky + Mondrian), extracted from actual source paintings; shapes sample colors with per-palette HSB variation
 - Gradient: `computeGradient(baseColor)` lerps `GRADIENT_LERP_AMOUNT` (0.2) toward white — top face is visibly lighter than the base
 - Animation sequence: sequential shape placement (one every 2 frames, up to 45 shapes) → 0.5s delay → 8.5s full rotation (2π on X and Z axes) → COMPLETE phase (parallax + click-to-freeze active; draw loop continues)
 - Lighting: `ambientLight(60)` + `directionalLight(200, 200, 200, 1, -1, -1)` — top-right direction
 - Seed control: `randomSeed(currentSeed)` in `initComposition()`; seed read from `#seed=N` URL hash or random on load; seed displayed in canvas corner overlay; URL hash updated on init
 - `R` key — regenerate with new random seed; `Click` — freeze/unfreeze after animation completes; `C` key — manual CCapture toggle; `?export=true` — auto-start/stop export; `Copy seed link` button — shares the current composition URL (clipboard on desktop, OS share sheet on mobile)
-- All named constants live in `src/config.js`; do not hardcode values in other files
+- Rendering constants (canvas size, shape counts, timing, gradient) live in `src/config.js`; painter-specific constants (palette data, grid, shapeTypes) live in the painter profile files (`src/klint-kandinsky.js`, `src/mondrian.js`) — do not hardcode these values in other files
+- Painter profile optional fields: `shapeTypes: ['rectangle', ...]` restricts draw functions (default: all 6); `rotationMode: 'fixed'` locks rotation to 0, `'orthogonal'` picks from 0°/90°/180°/270°, absent = `'free'` (random full rotation)
+- `?painter=klint-kandinsky` or `?painter=mondrian` in the URL selects the active painter at load time; `?painter=` is preserved through seed updates and refresh — combine with `#seed=N` for fully reproducible compositions
+- Shape objects carry `aspectRatio` (random 0.4–2.5); `drawRectangle` uses `size * aspectRatio` for width and `size` for height, producing true rectangles rather than always-square shapes
 
 ## Commands
 
@@ -142,7 +148,7 @@ P0–P7 from the original spec are **all implemented**. The following open items
 
 | Priority | Feature | Status |
 |---|---|---|
-| P0 | Color system — HSB mode, 5 curated Klint/Kandinsky palettes | ✅ Done (`src/palette.js`) |
+| P0 | Color system — HSB mode, 5 curated Klint/Kandinsky palettes | ✅ Done (`src/klint-kandinsky.js` data, `src/palette.js` functions) |
 | P1 | Gradient fix — `GRADIENT_LERP_AMOUNT: 0.2`, top face visibly lighter | ✅ Done (`src/config.js`, `src/palette.js`) |
 | P2 | Spatial composition — 6×11 grid with jitter + 30% skip for negative space | ✅ Done (`src/spatial.js`) |
 | P3 | Seed control — URL hash `#seed=N`, R key, seed overlay, reproducible output | ✅ Done (`src/sketch.js`) |
@@ -208,7 +214,7 @@ The work is not on OpenProcessing, fxhash, or any generative art community. Disc
 
 ### Medium-Term (Series Level)
 
-4. **"Computational Art History" series expansion.** This piece is one of at least three (alongside Hopper, Wing-Scale). A coherent series of 5-10 pieces — each reverse-engineering a different artist's compositional logic into parametric code — becomes a body of work. Bodies of work get exhibited, written about, and invited. Candidate artists: Mondrian, Agnes Martin, Bridget Riley, de Chirico, Vermeer.
+4. **"Computational Art History" series expansion.** This piece is one of at least three (alongside Hopper, Wing-Scale). A coherent series of 5-10 pieces — each reverse-engineering a different artist's compositional logic into parametric code — becomes a body of work. Bodies of work get exhibited, written about, and invited. ~~Mondrian~~ ✅ (shipped as `?painter=mondrian`). Remaining candidates: Agnes Martin, Bridget Riley, de Chirico, Vermeer.
 
 5. **Shared Custom Skill across the series.** A `generative-art-p5` skill encoding common standards (HSB color mode, seed control, portrait canvas, CCapture pipeline, named constants for parameters) would benefit every project in the series. Build once, apply everywhere.
 
