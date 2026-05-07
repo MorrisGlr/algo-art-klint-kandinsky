@@ -21,7 +21,9 @@ let positions = [];
 let animState;
 let palette;
 let activePainter;
+let activePainterKey;
 let currentSeed;
+let activePaletteIndex = null;
 let isFrozen = false;
 let capturing = false;
 let mediaRecorder = null;
@@ -100,14 +102,78 @@ function updateHash() {
   history.replaceState(null, '', url.toString());
 }
 
+function updatePainterParam() {
+  const url = new URL(window.location.href);
+  if (activePainterKey === DEFAULT_PAINTER) {
+    url.searchParams.delete('painter');
+  } else {
+    url.searchParams.set('painter', activePainterKey);
+  }
+  history.replaceState(null, '', url.toString());
+}
+
+function updatePainterTabs() {
+  document.querySelectorAll('.painter-tab').forEach(function (btn) {
+    btn.classList.toggle('active', btn.dataset.painter === activePainterKey);
+  });
+}
+
+function switchPainter(key) {
+  if (key === activePainterKey) return;
+  activePainter = PAINTERS[key] || PAINTERS[DEFAULT_PAINTER];
+  activePainterKey = key;
+  activePaletteIndex = null;
+  updatePainterParam();
+  updatePaletteParam();
+  isFrozen = false;
+  initComposition();
+  loop();
+}
+
+function updatePaletteParam() {
+  const url = new URL(window.location.href);
+  if (activePaletteIndex !== null) {
+    url.searchParams.set('palette', activePaletteIndex);
+  } else {
+    url.searchParams.delete('palette');
+  }
+  history.replaceState(null, '', url.toString());
+}
+
+function updatePaletteDisplay() {
+  const nameEl = document.getElementById('palette-name');
+  if (!nameEl) return;
+  const palettes = activePainter.palettes;
+  const idx = palettes.indexOf(palette);
+  nameEl.textContent = palette.name + ' (' + (idx + 1) + ' / ' + palettes.length + ')';
+}
+
+function cyclePalette(delta) {
+  const palettes = activePainter.palettes;
+  const currentIdx = activePaletteIndex !== null
+    ? activePaletteIndex
+    : palettes.indexOf(palette);
+  activePaletteIndex = (currentIdx + delta + palettes.length) % palettes.length;
+  updatePaletteParam();
+  isFrozen = false;
+  initComposition();
+  loop();
+}
+
 function initComposition() {
   randomSeed(currentSeed);
-  palette = selectPalette(activePainter.palettes);
+  // Always consume one PRNG call so layout is identical regardless of palette pin
+  const randomPalette = selectPalette(activePainter.palettes);
+  palette = activePaletteIndex !== null
+    ? activePainter.palettes[activePaletteIndex]
+    : randomPalette;
   positions = computePlacementPositions(activePainter.grid);
   animState = createAnimationState();
   shapes = [];
   updateSeedDisplay();
   updateHash();
+  updatePainterTabs();
+  updatePaletteDisplay();
 }
 
 function resolveRotation(painter) {
@@ -154,11 +220,27 @@ export function initSketch() {
     frameRate(CONFIG.FRAME_RATE);
 
     const params = new URLSearchParams(window.location.search);
-    const painterKey = params.get('painter') || DEFAULT_PAINTER;
-    activePainter = PAINTERS[painterKey] || PAINTERS[DEFAULT_PAINTER];
+    activePainterKey = params.get('painter') || DEFAULT_PAINTER;
+    activePainter = PAINTERS[activePainterKey] || PAINTERS[DEFAULT_PAINTER];
+
+    const paletteParam = parseInt(params.get('palette'), 10);
+    if (!isNaN(paletteParam) && paletteParam >= 0 && paletteParam < activePainter.palettes.length) {
+      activePaletteIndex = paletteParam;
+    }
 
     currentSeed = parseSeedFromHash() || Math.floor(Math.random() * 1000000);
     initComposition();
+
+    // Painter switcher tabs
+    document.querySelectorAll('.painter-tab').forEach(function (btn) {
+      btn.addEventListener('click', function () { switchPainter(btn.dataset.painter); });
+    });
+
+    // Palette selector buttons
+    const prevBtn = document.getElementById('palette-prev');
+    const nextBtn = document.getElementById('palette-next');
+    if (prevBtn) prevBtn.addEventListener('click', function () { cyclePalette(-1); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { cyclePalette(+1); });
 
     // Share button — copy seed URL to clipboard, or open native share sheet on mobile
     const shareBtn = document.getElementById('share-btn');
@@ -256,7 +338,7 @@ export function initSketch() {
   };
 
   window.mousePressed = function (event) {
-    if (event && event.target && event.target.id === 'share-btn') return;
+    if (event && event.target && event.target.tagName === 'BUTTON') return;
     if (animState && animState.phase === PHASE.COMPLETE) {
       isFrozen = !isFrozen;
       if (isFrozen) {

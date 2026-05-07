@@ -85,7 +85,8 @@ algo-art-klint-kandinsky/
 - `R` key — regenerate with new random seed; `Click` — freeze/unfreeze after animation completes; `C` key — manual CCapture toggle; `?export=true` — auto-start/stop export; `Copy seed link` button — shares the current composition URL (clipboard on desktop, OS share sheet on mobile)
 - Rendering constants (canvas size, shape counts, timing, gradient) live in `src/config.js`; painter-specific constants (palette data, grid, shapeTypes) live in the painter profile files (`src/klint-kandinsky.js`, `src/mondrian.js`) — do not hardcode these values in other files
 - Painter profile optional fields: `shapeTypes: ['rectangle', ...]` restricts draw functions (default: all 6); `rotationMode: 'fixed'` locks rotation to 0, `'orthogonal'` picks from 0°/90°/180°/270°, absent = `'free'` (random full rotation)
-- `?painter=klint-kandinsky` or `?painter=mondrian` in the URL selects the active painter at load time; `?painter=` is preserved through seed updates and refresh — combine with `#seed=N` for fully reproducible compositions
+- `?painter=klint-kandinsky` or `?painter=mondrian` in the URL selects the active painter at load time; `?painter=` is preserved through seed updates and refresh — combine with `#seed=N` for fully reproducible compositions. The info panel painter tabs (Klint & Kandinsky | Mondrian) call `switchPainter(key)` in `sketch.js` for dynamic reinit without a page reload; switching resets `activePaletteIndex` since palettes are painter-specific.
+- `?palette=N` (0-indexed) pins the active palette; the info panel `← / →` buttons set this param via `history.replaceState` and trigger a full animation replay with the same seed; `R` key keeps the pinned palette; "Copy seed link" captures the full URL including `?palette=N`
 - Shape objects carry `aspectRatio` (random 0.4–2.5); `drawRectangle` uses `size * aspectRatio` for width and `size` for height, producing true rectangles rather than always-square shapes
 
 ## Commands

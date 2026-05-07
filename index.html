@@ -3,23 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Morris Aguilar — Klint & Kandinsky Generative Art</title>
-    <meta name="description" content="Generative 3D compositions by Morris Aguilar, inspired by the geometric abstraction of Hilma af Klint and Wassily Kandinsky. Part of the Computational Art History series. Built with p5.js and WebGL.">
+    <title>Morris A. Aguilar — Klint & Kandinsky Generative Art</title>
+    <meta name="description" content="Generative 3D compositions by Morris A. Aguilar, inspired by the geometric abstraction of Hilma af Klint and Wassily Kandinsky. Part of the Computational Art History series. Built with p5.js and WebGL.">
 
     <!-- Open Graph -->
-    <meta property="og:title" content="Morris Aguilar — Klint & Kandinsky Generative Art">
-    <meta property="og:description" content="Generative 3D compositions by Morris Aguilar, inspired by the geometric abstraction of Hilma af Klint and Wassily Kandinsky. Part of the Computational Art History series. Built with p5.js and WebGL.">
+    <meta property="og:title" content="Morris A. Aguilar — Klint & Kandinsky Generative Art">
+    <meta property="og:description" content="Generative 3D compositions by Morris A. Aguilar, inspired by the geometric abstraction of Hilma af Klint and Wassily Kandinsky. Part of the Computational Art History series. Built with p5.js and WebGL.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://morrisglr.github.io/algo-art-klint-kandinsky/">
     <meta property="og:image" content="https://morrisglr.github.io/algo-art-klint-kandinsky/og-image.png">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Morris Aguilar — Klint & Kandinsky Generative Art">
-    <meta name="twitter:description" content="Generative 3D compositions by Morris Aguilar inspired by Hilma af Klint and Wassily Kandinsky. Built with p5.js and WebGL.">
+    <meta name="twitter:title" content="Morris A. Aguilar — Klint & Kandinsky Generative Art">
+    <meta name="twitter:description" content="Generative 3D compositions by Morris A. Aguilar inspired by Hilma af Klint and Wassily Kandinsky. Built with p5.js and WebGL.">
     <meta name="twitter:image" content="https://morrisglr.github.io/algo-art-klint-kandinsky/og-image.png">
 
-    <meta name="author" content="Morris Aguilar">
+    <meta name="author" content="Morris A. Aguilar">
     <link rel="canonical" href="https://morrisglr.github.io/algo-art-klint-kandinsky/">
 
     <script type="application/ld+json">
@@ -35,7 +35,7 @@
       "dateCreated": "2024",
       "creator": {
         "@type": "Person",
-        "name": "Morris Aguilar",
+        "name": "Morris A. Aguilar",
         "url": "https://morrisglr.github.io/creative"
       },
       "isPartOf": {
@@ -225,13 +225,94 @@
       .info .portfolio-link a:hover {
         color: #999;
       }
+
+      #painter-selector {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 16px;
+      }
+
+      .painter-tab {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 3px;
+        color: rgba(255, 255, 255, 0.55);
+        font-family: monospace;
+        font-size: 11px;
+        cursor: pointer;
+        padding: 5px 8px;
+        transition: background 0.15s, border-color 0.15s, color 0.15s;
+      }
+
+      .painter-tab:hover {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.45);
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .painter-tab.active {
+        background: rgba(255, 255, 255, 0.18);
+        border-color: rgba(255, 255, 255, 0.55);
+        color: rgba(255, 255, 255, 0.95);
+      }
+
+      #palette-selector {
+        margin-bottom: 16px;
+        font-family: monospace;
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      .palette-label {
+        font-size: 12px;
+        color: #777;
+        margin-bottom: 6px;
+      }
+
+      .palette-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      #palette-prev,
+      #palette-next {
+        background: rgba(255, 255, 255, 0.11);
+        border: 1px solid rgba(255, 255, 255, 0.38);
+        border-radius: 3px;
+        color: rgba(255, 255, 255, 0.78);
+        font-family: monospace;
+        font-size: 12px;
+        cursor: pointer;
+        padding: 2px 7px;
+        flex-shrink: 0;
+        transition: background 0.15s, border-color 0.15s;
+      }
+
+      #palette-prev:hover,
+      #palette-next:hover {
+        background: rgba(255, 255, 255, 0.18);
+        border-color: rgba(255, 255, 255, 0.6);
+      }
+
+      #palette-name {
+        flex: 1;
+        text-align: center;
+      }
+
+      @media (max-width: 700px) {
+        .palette-row {
+          justify-content: center;
+        }
+      }
     </style>
 </head>
 <body>
   <div id="layout">
     <div class="info">
       <h1>Klint & Kandinsky</h1>
-      <h2 class="subtitle">Morris Aguilar</h2>
+      <h2 class="subtitle">Morris A. Aguilar</h2>
       <p class="statement">
         Hilma af Klint and Wassily Kandinsky each developed systematic visual grammars in the early twentieth
         century, encoding spiritual and perceptual ideas into relationships between shape, color, and space.
@@ -243,13 +324,25 @@
         each painter's spatial and color logic into a parametric, browser-based generative system. Each
         composition is reproducible by seed and shareable by URL.
       </p>
+      <div id="painter-selector">
+        <button class="painter-tab" data-painter="klint-kandinsky">Klint &amp; Kandinsky</button>
+        <button class="painter-tab" data-painter="mondrian">Mondrian</button>
+      </div>
+      <div id="palette-selector">
+        <div class="palette-label">Explore palette</div>
+        <div class="palette-row">
+          <button id="palette-prev" aria-label="Previous palette">&#8592;</button>
+          <span id="palette-name"></span>
+          <button id="palette-next" aria-label="Next palette">&#8594;</button>
+        </div>
+      </div>
       <div class="controls">
         <kbd>R</kbd> Generate new composition &nbsp;&middot;&nbsp;
         <kbd>Click</kbd> Freeze / unfreeze &nbsp;&middot;&nbsp;
-        <kbd>#seed=42</kbd> Reproduce a composition (e.g., <code>morrisglr.github.io/algo-art-klint-kandinsky/#seed=42</code>)
+        <kbd>#seed=42</kbd> <br><br>Reproduce a composition by clicking the seed link.
       </div>
       <p class="portfolio-link">
-        <a href="https://morrisglr.github.io/creative" rel="author">Morris Aguilar — Creative Portfolio</a>
+        <a href="https://morrisglr.github.io/creative" rel="author">Morris A. Aguilar — Creative Portfolio</a>
       </p>
     </div>
 

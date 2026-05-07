@@ -8,7 +8,7 @@ export const MONDRIAN = {
   lightingMode: 'flat',
   palettes: [
     {
-      name: 'Mondrian Red Yellow Blue',
+      name: 'Red Yellow Blue',
       source: 'Composition with Red, Blue and Yellow (1930)',
       background: [40, 5, 97],  // near-white with slight warmth
       colors: [
@@ -21,7 +21,7 @@ export const MONDRIAN = {
       variation: { hue: 2, saturation: 3, brightness: 3 },
     },
     {
-      name: 'Mondrian Composition A',
+      name: 'Composition A',
       source: 'Composition A (1923)',
       background: [0, 0, 98],   // pure white
       colors: [
@@ -34,7 +34,7 @@ export const MONDRIAN = {
       variation: { hue: 2, saturation: 3, brightness: 3 },
     },
     {
-      name: 'Mondrian Tableau I',
+      name: 'Tableau I',
       source: 'Tableau I (1921)',
       background: [45, 8, 96],  // warm cream-white
       colors: [
@@ -47,7 +47,7 @@ export const MONDRIAN = {
       variation: { hue: 2, saturation: 3, brightness: 3 },
     },
     {
-      name: 'Mondrian Broadway Boogie-Woogie',
+      name: 'Broadway Boogie-Woogie',
       source: 'Broadway Boogie-Woogie (1942–43)',
       background: [42, 12, 95], // warm cream
       colors: [
@@ -60,7 +60,7 @@ export const MONDRIAN = {
       variation: { hue: 2, saturation: 3, brightness: 4 },
     },
     {
-      name: 'Mondrian Victory Boogie-Woogie',
+      name: 'Victory Boogie-Woogie',
       source: 'Victory Boogie-Woogie (1944)',
       background: [45, 10, 94], // cream
       colors: [
