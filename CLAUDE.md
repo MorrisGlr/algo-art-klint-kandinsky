@@ -28,7 +28,7 @@ This project is one entry in a broader "Computational Art History" series (along
 - p5.js **v1.11.12** installed via npm (not CDN); dynamically imported in `src/main.js` to avoid module hoisting issues with global mode
 - Two painter profiles ship: `src/klint-kandinsky.js` (Klint + Kandinsky, 5 palettes, 6×11 grid) and `src/mondrian.js` (Mondrian, 5 palettes, 4×6 grid, rectangles only). `src/painters.js` is the registry; active profile is selected at runtime via `?painter=<key>` URL param (default: `klint-kandinsky`). Adding painter #3 = create file + add one entry to `painters.js`
 - `selectPalette(palettes)` and `computePlacementPositions(grid)` are parameter-driven — no profile is hardcoded in `palette.js` or `spatial.js`
-- CCapture.js v1.1.0 loaded via jsdelivr CDN — lazily instantiated only in export mode (`?export=true`)
+- Recording uses the native MediaRecorder API (no CDN) — `startRecording()` / `stopRecording()` in `sketch.js`; triggered by C key, `?export=true` URL param, or the "Export video" button in the info panel
 - Canvas: 1080×1920 (portrait, 9:16), with CSS responsive sizing; layout is side-by-side (info panel left, canvas right) on wide screens, stacked on mobile
 - Deployed to GitHub Pages at `morrisglr.github.io/algo-art-klint-kandinsky` via GitHub Actions (Vite build → `dist/`)
 - No server-side dependencies — pure client-side rendering
@@ -82,7 +82,7 @@ algo-art-klint-kandinsky/
 - Animation sequence: sequential shape placement (one every 2 frames, up to 45 shapes) → 0.5s delay → 8.5s full rotation (2π on X and Z axes) → COMPLETE phase (parallax + click-to-freeze active; draw loop continues)
 - Lighting: `ambientLight(60)` + `directionalLight(200, 200, 200, 1, -1, -1)` — top-right direction
 - Seed control: `randomSeed(currentSeed)` in `initComposition()`; seed read from `#seed=N` URL hash or random on load; seed displayed in canvas corner overlay; URL hash updated on init
-- `R` key — regenerate with new random seed; `Click` — freeze/unfreeze after animation completes; `C` key — manual CCapture toggle; `?export=true` — auto-start/stop export; `Copy seed link` button — shares the current composition URL (clipboard on desktop, OS share sheet on mobile)
+- `R` key — regenerate with new random seed; `Click` — freeze/unfreeze after animation completes; `C` key — manual recording toggle; `?export=true` — auto-start/stop export; `Copy seed link` button — shares the current composition URL (clipboard on desktop, OS share sheet on mobile); `Export video (.webm)` button in info panel — replays full animation and downloads recording (enabled only at COMPLETE phase)
 - Rendering constants (canvas size, shape counts, timing, gradient) live in `src/config.js`; painter-specific constants (palette data, grid, shapeTypes) live in the painter profile files (`src/klint-kandinsky.js`, `src/mondrian.js`) — do not hardcode these values in other files
 - Painter profile optional fields: `shapeTypes: ['rectangle', ...]` restricts draw functions (default: all 6); `rotationMode: 'fixed'` locks rotation to 0, `'orthogonal'` picks from 0°/90°/180°/270°, absent = `'free'` (random full rotation)
 - `?painter=klint-kandinsky` or `?painter=mondrian` in the URL selects the active painter at load time; `?painter=` is preserved through seed updates and refresh — combine with `#seed=N` for fully reproducible compositions. The info panel painter tabs (Klint & Kandinsky | Mondrian) call `switchPainter(key)` in `sketch.js` for dynamic reinit without a page reload; switching resets `activePaletteIndex` since palettes are painter-specific.
@@ -241,7 +241,7 @@ These are drawn from both the project-level and portfolio-level context document
 - ~~**Seed control + reproducibility.**~~ ✅ Done — `#seed=N` URL hash, R key regeneration, seed overlay, reproducible output per pinned p5.js version.
 - ~~**Interactivity.**~~ ✅ Done — Y-axis mouse parallax after animation; click to freeze/unfreeze; `Copy seed link` share button.
 - **Series framing.** One sketch is a project. A curated series of 5-10 "Algorithmic Masters" pieces becomes a body of work. Bodies of work get invited.
-- **Export pipeline.** The CCapture.js infrastructure exists but isn't polished enough for exhibition-quality video or social-media-ready loops.
+- ~~**Export pipeline.**~~ ✅ Done — "Export video (.webm)" button in info panel replays animation and downloads recording via MediaRecorder.
 - **Submit to showcases.** Processing Community Day, SIGGRAPH Art Gallery, Ars Electronica Open Call, creative coding meetups. The interdisciplinary signal (physician-engineer-artist) is an asymmetric advantage in these venues because that combination essentially does not exist.
 
 ### For the Portfolio as a Whole

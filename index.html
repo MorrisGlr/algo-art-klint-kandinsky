@@ -119,7 +119,7 @@
         background: rgba(255, 255, 255, 0.11);
         border: 1px solid rgba(255, 255, 255, 0.38);
         border-radius: 20px;
-        color: rgba(255, 255, 255, 0.78);
+        color: #bbb;
         font-family: monospace;
         font-size: 11px;
         letter-spacing: 0.03em;
@@ -306,6 +306,37 @@
           justify-content: center;
         }
       }
+
+      #export-section {
+        margin-bottom: 16px;
+        font-family: monospace;
+        font-size: 11px;
+      }
+
+      #export-btn {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 3px;
+        color: rgba(255, 255, 255, 0.55);
+        font-family: monospace;
+        font-size: 11px;
+        cursor: pointer;
+        padding: 5px 8px;
+        margin-top: 6px;
+        transition: background 0.15s, border-color 0.15s, color 0.15s;
+      }
+
+      #export-btn:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.45);
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      #export-btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+      }
     </style>
 </head>
 <body>
@@ -315,13 +346,12 @@
       <h2 class="subtitle">Morris A. Aguilar</h2>
       <p class="statement">
         Hilma af Klint and Wassily Kandinsky each developed systematic visual grammars in the early twentieth
-        century, encoding spiritual and perceptual ideas into relationships between shape, color, and space.
-        Klint's canvases balance geometric and organic forms with deliberate negative space. Kandinsky argued
-        in <em>Point and Line to Plane</em> (1926) that each geometric element carries intrinsic emotional weight.
+        century, encoding perceptual ideas into relationships between shape, color, and space.
+        Klint's canvases balance geometric and organic forms with deliberate negative space.
       </p>
       <p class="statement">
         This piece is the first entry in the Computational Art History series, a body of work that translates
-        each painter's spatial and color logic into a parametric, browser-based generative system. Each
+        each painter's spatial and color logic into a browser-based generative system. Each
         composition is reproducible by seed and shareable by URL.
       </p>
       <div id="painter-selector">
@@ -335,6 +365,10 @@
           <span id="palette-name"></span>
           <button id="palette-next" aria-label="Next palette">&#8594;</button>
         </div>
+      </div>
+      <div id="export-section">
+        <div class="palette-label">Save composition</div>
+        <button id="export-btn" disabled>Export video (.webm)</button>
       </div>
       <div class="controls">
         <kbd>R</kbd> Generate new composition &nbsp;&middot;&nbsp;

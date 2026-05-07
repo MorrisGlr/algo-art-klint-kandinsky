@@ -33,6 +33,7 @@ let offscreenCanvas = null;
 let offscreenCtx = null;
 let exportMode = false;
 let exportStopped = false;
+let buttonExportActive = false;
 
 const PARALLAX_TILT_RANGE = Math.PI / 12;  // +/- 15 degrees
 
@@ -45,6 +46,13 @@ function parseSeedFromHash() {
 function showRecIndicator(visible) {
   const el = document.getElementById('rec-indicator');
   if (el) el.style.display = visible ? 'flex' : 'none';
+}
+
+function updateExportButton() {
+  const btn = document.getElementById('export-btn');
+  if (!btn) return;
+  btn.disabled = capturing || !animState || animState.phase !== PHASE.COMPLETE;
+  btn.textContent = buttonExportActive ? 'Recording…' : 'Export video (.webm)';
 }
 
 function startRecording() {
@@ -161,6 +169,10 @@ function cyclePalette(delta) {
 }
 
 function initComposition() {
+  if (buttonExportActive) {
+    buttonExportActive = false;
+    stopRecording();
+  }
   randomSeed(currentSeed);
   // Always consume one PRNG call so layout is identical regardless of palette pin
   const randomPalette = selectPalette(activePainter.palettes);
@@ -263,6 +275,20 @@ export function initSketch() {
       });
     }
 
+    // Export button — replays full animation and records it
+    const exportBtn = document.getElementById('export-btn');
+    if (exportBtn) {
+      exportBtn.addEventListener('click', function () {
+        if (buttonExportActive || capturing || !animState || animState.phase !== PHASE.COMPLETE) return;
+        isFrozen = false;
+        initComposition();         // resets to PLACING — buttonExportActive still false
+        buttonExportActive = true; // set after initComposition to avoid cancel guard
+        startRecording();
+        updateExportButton();
+        loop();
+      });
+    }
+
     // Export mode: auto-start recording
     exportMode = params.get('export') === 'true';
     if (exportMode) {
@@ -311,6 +337,15 @@ export function initSketch() {
       stopRecording();
       noLoop();
     }
+
+    // Auto-stop button-triggered export recording after animation completes
+    if (buttonExportActive && animState.phase === PHASE.COMPLETE) {
+      buttonExportActive = false;
+      stopRecording();
+      updateExportButton();
+    }
+
+    updateExportButton();
 
     // Copy complete frame to offscreen 2D canvas then request capture — explicit timing, no race
     if (capturing && offscreenCtx && videoTrack) {
