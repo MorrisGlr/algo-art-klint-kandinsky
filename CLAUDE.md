@@ -333,7 +333,7 @@ Remaining: ~7 hours. The foundation (palettes, seed control, landing page, OG me
 ## Dependencies and Known Issues
 
 - **p5.js:** v1.11.12 installed via npm (`dependencies`). Do NOT upgrade to p5.js 2.x — it requires instance mode, which would force `p.` prefix on every p5 call throughout `src/`.
-- **CCapture.js:** v1.1.0 loaded via jsdelivr CDN in `index.html`. Not in `package.json`. Lazily instantiated in `src/sketch.js` only when `?export=true` or `C` is pressed — if the CDN fails, normal browsing is unaffected.
+- **MediaRecorder API:** Native browser API used for all recording (`C` key and `?export=true`). No CDN dependency. `canvas.captureStream(60)` feeds a `MediaStream` into `MediaRecorder`; `onstop` assembles the recorded chunks into a `.webm` blob and downloads it. Supported in Chrome, Firefox, and Safari 14.1+. CCapture.js was removed — it relied on `canvas.toDataURL('image/webp')` which Firefox and Safari handle strictly per the WebGL spec (blank frames when `preserveDrawingBuffer` is false).
 - **Vite:** v6.x devDependency. Base path configured to `/algo-art-klint-kandinsky/` in `vite.config.js` for GitHub Pages sub-path deployment.
 - **Vitest:** v3.x devDependency. Test environment is `node`; p5 globals are stubbed in `test/helpers/p5mock.js`.
 - **Portrait canvas sizing:** The 1080×1920 canvas is hardcoded in `src/config.js` (`CANVAS_WIDTH`, `CANVAS_HEIGHT`). CSS responsive sizing adapts to viewport.

@@ -46,7 +46,6 @@
     }
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/ccapture.js@1.1.0/build/CCapture.all.min.js"></script>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -141,6 +140,22 @@
 
       #share-btn svg {
         flex-shrink: 0;
+      }
+
+      #rec-indicator {
+        display: none;
+        align-items: center;
+        gap: 4px;
+        color: #ff4444;
+        font-family: monospace;
+        font-size: 11px;
+        letter-spacing: 0.05em;
+        animation: rec-blink 1s step-start infinite;
+      }
+
+      @keyframes rec-blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
       }
 
       .info {
@@ -241,6 +256,7 @@
     <div id="canvas-container">
       <div id="seed-bar">
         <span id="seed-overlay"></span>
+        <span id="rec-indicator">● REC</span>
         <button id="share-btn" aria-label="Copy seed link to clipboard">
           <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>

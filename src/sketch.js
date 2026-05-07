@@ -24,7 +24,11 @@ let activePainter;
 let currentSeed;
 let isFrozen = false;
 let capturing = false;
-let capturer;
+let mediaRecorder = null;
+let recordedChunks = [];
+let videoTrack = null;
+let offscreenCanvas = null;
+let offscreenCtx = null;
 let exportMode = false;
 let exportStopped = false;
 
@@ -34,6 +38,55 @@ function parseSeedFromHash() {
   const hash = window.location.hash;
   const match = hash.match(/#seed=(\d+)/);
   return match ? parseInt(match[1], 10) : null;
+}
+
+function showRecIndicator(visible) {
+  const el = document.getElementById('rec-indicator');
+  if (el) el.style.display = visible ? 'flex' : 'none';
+}
+
+function startRecording() {
+  const canvas = document.getElementById('defaultCanvas0');
+  if (!canvas || !canvas.captureStream) return;
+  offscreenCanvas = document.createElement('canvas');
+  offscreenCanvas.width = canvas.width;
+  offscreenCanvas.height = canvas.height;
+  offscreenCtx = offscreenCanvas.getContext('2d');
+  const stream = offscreenCanvas.captureStream(0);
+  videoTrack = stream.getVideoTracks()[0];
+  const mimeType = MediaRecorder.isTypeSupported('video/webm; codecs=vp9')
+    ? 'video/webm; codecs=vp9'
+    : 'video/webm';
+  recordedChunks = [];
+  mediaRecorder = new MediaRecorder(stream, { mimeType });
+  mediaRecorder.ondataavailable = function (e) {
+    if (e.data.size > 0) recordedChunks.push(e.data);
+  };
+  mediaRecorder.onstop = function () {
+    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'klint-kandinsky-seed-' + currentSeed + '.webm';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    recordedChunks = [];
+    mediaRecorder = null;
+  };
+  mediaRecorder.start();
+  capturing = true;
+  showRecIndicator(true);
+}
+
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop();
+  }
+  capturing = false;
+  videoTrack = null;
+  offscreenCanvas = null;
+  offscreenCtx = null;
+  showRecIndicator(false);
+  loop();
 }
 
 function updateSeedDisplay() {
@@ -94,6 +147,7 @@ export function initSketch() {
   window.setup = function () {
     colorMode(HSB, 360, 100, 100);
     pixelDensity(CONFIG.PIXEL_DENSITY);
+    setAttributes('preserveDrawingBuffer', true);
     const cnv = createCanvas(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, WEBGL);
     cnv.parent('canvas-container');
     document.getElementById('canvas-container').classList.add('canvas-ready');
@@ -127,12 +181,10 @@ export function initSketch() {
       });
     }
 
-    // Export mode: auto-start CCapture recording
+    // Export mode: auto-start recording
     exportMode = params.get('export') === 'true';
-    if (exportMode && typeof CCapture !== 'undefined') {
-      capturer = new CCapture({ format: 'webm', framerate: 60 });
-      capturer.start();
-      capturing = true;
+    if (exportMode) {
+      startRecording();
     }
 
     background(getBackgroundColor(palette));
@@ -171,23 +223,17 @@ export function initSketch() {
       DRAW_FUNCTIONS[s.type](s);
     }
 
-    if (capturing && capturer) {
-      capturer.capture(document.getElementById('defaultCanvas0'));
-    }
-
     // Auto-stop export recording after animation completes
     if (exportMode && !exportStopped && animState.phase === PHASE.COMPLETE) {
       exportStopped = true;
-      if (capturer) {
-        capturer.stop();
-        capturer.save(function (blob) {
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(blob);
-          a.download = 'klint-kandinsky-seed-' + currentSeed + '.webm';
-          a.click();
-        });
-      }
+      stopRecording();
       noLoop();
+    }
+
+    // Copy complete frame to offscreen 2D canvas then request capture — explicit timing, no race
+    if (capturing && offscreenCtx && videoTrack) {
+      offscreenCtx.drawImage(document.getElementById('defaultCanvas0'), 0, 0);
+      videoTrack.requestFrame();
     }
   };
 
@@ -201,16 +247,10 @@ export function initSketch() {
     }
 
     if (key === 'C' || key === 'c') {
-      if (typeof CCapture === 'undefined') return;
-      capturing = !capturing;
-      if (capturing) {
-        if (!capturer) {
-          capturer = new CCapture({ format: 'webm', framerate: 60 });
-        }
-        capturer.start();
+      if (!capturing) {
+        startRecording();
       } else {
-        capturer.stop();
-        capturer.save();
+        stopRecording();
       }
     }
   };
