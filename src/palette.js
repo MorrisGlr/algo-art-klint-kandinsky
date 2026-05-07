@@ -14,10 +14,10 @@ export function sampleColor(palette) {
   return color(h, s, b);
 }
 
-export function computeGradient(baseColor) {
-  // Lerp toward a desaturated bright version of the same hue for visible lightening
+export function computeGradient(baseColor, lerpAmount) {
+  const amount = lerpAmount ?? CONFIG.GRADIENT_LERP_AMOUNT;
   const target = color(hue(baseColor), 0, 100);
-  const topColor = lerpColor(baseColor, target, CONFIG.GRADIENT_LERP_AMOUNT);
+  const topColor = lerpColor(baseColor, target, amount);
   return { topColor, baseColor };
 }
 

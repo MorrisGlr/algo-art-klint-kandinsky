@@ -49,7 +49,7 @@ export const KLINT_KANDINSKY = {
     {
       name: 'Klint Adulthood',
       source: 'The Ten Largest, No. 7: Adulthood (1907)',
-      background: [340, 18, 88],  // soft pink
+      background: [40, 10, 90],   // warm cream
       colors: [
         [340, 55, 75],  // deep pink
         [190, 50, 65],  // steel blue

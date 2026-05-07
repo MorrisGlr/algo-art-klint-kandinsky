@@ -71,7 +71,8 @@ function createRandomShape() {
   };
 
   const baseColor = sampleColor(palette);
-  const grad = computeGradient(baseColor);
+  const lerpAmount = activePainter.gradientLerpAmount ?? CONFIG.GRADIENT_LERP_AMOUNT;
+  const grad = computeGradient(baseColor, lerpAmount);
   const shapePool = activePainter.shapeTypes || SHAPE_TYPES;
 
   return {
@@ -140,9 +141,18 @@ export function initSketch() {
   window.draw = function () {
     background(getBackgroundColor(palette));
 
-    // Lighting — fixed top-right direction
-    ambientLight(60);
-    directionalLight(200, 200, 200, 1, -1, -1);
+    const cameraZ = (CONFIG.CANVAS_HEIGHT / 2) / Math.tan(Math.PI / 6) * CONFIG.CAMERA_DISTANCE_MULTIPLIER;
+    camera(0, 0, cameraZ, 0, 0, 0, 0, 1, 0);
+
+    // Lighting — flat (ambient only) for Mondrian; directional for other painters
+    if (activePainter.lightingMode === 'flat') {
+      ambientLight(200);
+    } else {
+      colorMode(RGB, 255);
+      ambientLight(255, 255, 255);
+      directionalLight(25, 25, 25, 1, -1, -1);
+      colorMode(HSB, 360, 100, 100);
+    }
 
     updateAnimation(animState, shapes.length);
     applyRotation(animState);
